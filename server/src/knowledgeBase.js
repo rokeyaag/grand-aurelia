@@ -296,10 +296,16 @@ export function queryKnowledgeBase(query, db = {}) {
   const inventory = db.inventory || [];
   const invoices = db.invoices || [];
 
-  const isBengali = /[\u0980-\u09FF]/.test(q) || 
-                    q.includes('kemon') || q.includes('koto') || q.includes('ki') || 
-                    q.includes('hobe') || q.includes('kichu') || q.includes('bolo') || 
-                    q.includes('janiye') || q.includes('parbo');
+  let lang = 'en';
+  if (/[\u0980-\u09FF]/.test(q) || q.includes('kemon') || q.includes('koto') || q.includes('ki') || q.includes('hobe') || q.includes('kichu') || q.includes('bolo') || q.includes('janiye') || q.includes('parbo') || q.includes('amake')) {
+    lang = 'bn';
+  } else if (/[\u0600-\u06FF]/.test(q)) {
+    lang = 'ar';
+  } else if (q.includes('flug') || q.includes('flüge') || q.includes('zimmer') || q.includes('speisekarte') || q.includes('essen') || q.includes('buchen') || q.includes('rechnung') || q.includes('hallo') || q.includes('deutsch') || q.includes('preis') || q.includes('wie') || q.includes('bitte') || q.includes('danke')) {
+    lang = 'de';
+  }
+
+  const isBengali = lang === 'bn';
 
   let matchedTopic = null;
   let highestScore = 0;
@@ -316,8 +322,7 @@ export function queryKnowledgeBase(query, db = {}) {
   }
 
   // Check for Flight specific queries
-  if (q.includes('flight') || q.includes('airline') || q.includes('ticket') || q.includes('বিমান') || q.includes('ফ্লাইট') || q.includes('টিকেট') || q.includes('dubai') || q.includes('london') || q.includes('singapore')) {
-    const flightTopic = KNOWLEDGE_TOPICS.find(t => t.id === 'flights');
+  if (q.includes('flight') || q.includes('airline') || q.includes('ticket') || q.includes('flug') || q.includes('flüge') || q.includes('طيران') || q.includes('تذكرة') || q.includes('বিমান') || q.includes('ফ্লাইট') || q.includes('টিকেট') || q.includes('dubai') || q.includes('london') || q.includes('singapore')) {
     const matchingFlights = FLIGHT_SCHEDULES.slice(0, 3);
 
     const flightCards = matchingFlights.map(f => ({
@@ -335,10 +340,49 @@ export function queryKnowledgeBase(query, db = {}) {
       flightData: f
     }));
 
+    let flightReply = '';
+    if (lang === 'bn') {
+      flightReply = `✈️ **গ্র্যান্ড অরেলিয়া ভিআইপি এয়ারলাইন্স টিকিট ও বোর্ডিং পাস সার্ভিস**:
+আমরা বিশ্বের শীর্ষস্থানীয় এয়ারলাইন্সের মাধ্যমে সরাসরি বিমান টিকিট বুকিং সুবিধা প্রদান করি:
+1. **ঢাকা ⇄ দুবাই (Emirates EK-583)**: ইকোনমি **$৩৮০** | বিজনেস **$৮৫০** | ফার্স্ট সুইট **$১,৬৫০**
+2. **ঢাকা ⇄ সিঙ্গাপুর (Singapore SQ-447)**: ইকোনমি **$৩৪০** | বিজনেস **$৭৮০**
+3. **ঢাকা ⇄ লন্ডন (Qatar Airways QR-641 Qsuite)**: ইকোনমি **$৬২০** | বিজনেস **$১,২৫০**
+4. **ঢাকা ⇄ ব্যাংকক (Thai Airways TG-322)**: ইকোনমি **$২৪০** | বিজনেস **$৫২০**
+5. **প্রাইভেট জেট চার্টার (Gulfstream G650ER)**: **$৮,৫০০/ফ্লাইট** (অন-ডিমান্ড ভিআইপি)।
+
+*নিচে প্রদর্শিত টিকেট কার্ড থেকে সরাসরি **"Book Ticket"** বাটনে চাপ দিয়ে ইনস্ট্যান্ট ই-টিকেট ও বোর্ডিং পাস বুক করতে পারেন!*`;
+    } else if (lang === 'de') {
+      flightReply = `✈️ **Grand Aurelia VIP Flugbuchung & Digitale Bordkarten**:
+Wir bieten weltweite Premium-Flugreservierungen mit Partnerfluggesellschaften:
+1. **Dhaka ⇄ Dubai (Emirates EK-583)**: Economy **$380** | Business **$850** | First Suite **$1.650**
+2. **Dhaka ⇄ Singapur (Singapore SQ-447)**: Economy **$340** | Business **$780**
+3. **Dhaka ⇄ London (Qatar Airways QR-641)**: Economy **$620** | Business **$1.250**
+4. **VIP Privatjet (Gulfstream G650ER)**: **$8.500/Flug** (Weltweit inklusive Chauffeur & Privatkoch).
+
+*Klicken Sie unten auf **"Ticket buchen"**, um Ihren Sitzplatz zu sichern!*`;
+    } else if (lang === 'ar') {
+      flightReply = `✈️ **خدمة حجز تذاكر الطيران وبطاقات الصعود - غراند أوريليا**:
+نوفر حجوزات فورية وبطاقات صعود رقمية عبر أفضل خطوط الطيران:
+١. **دكا ⇄ دبي (طيران الإمارات EK-583)**: الدرجة السياحية **٣٨٠$** | درجة الأعمال **٨٥٠$** | الجناح الأول **١,٦٥٠$**
+٢. **دكا ⇄ سنغافورة (الخطوط السنغافورية SQ-447)**: السياحية **٣٤٠$** | الأعمال **٧٨٠$**
+٣. **دكا ⇄ لندن (الخطوط القطرية QR-641)**: السياحية **٦٢٠$** | كيو سويت **١,٢٥٠$**
+٤. **طائرة خاصة VIP (Gulfstream G650ER)**: **٨,٥٠٠$ / رحلة**.`;
+    } else {
+      flightReply = `✈️ **Grand Aurelia VIP Airline & Flight Concierge**:
+We provide instant flight ticket booking and digital boarding passes with top global airlines:
+1. **Dhaka ⇄ Dubai (Emirates EK-583)**: Economy **$380** | Business **$850** | First Suite **$1,650**
+2. **Dhaka ⇄ Singapore (Singapore Airlines SQ-447)**: Economy **$340** | Business **$780**
+3. **Dhaka ⇄ London (Qatar Airways QR-641 Qsuite)**: Economy **$620** | Qsuite Business **$1,250**
+4. **Dhaka ⇄ Bangkok (Thai Airways TG-322)**: Economy **$240** | Business **$520**
+5. **Private Jet Gulfstream G650ER**: **$8,500/trip** (Worldwide on-demand with private chef & limousine).
+
+*Click the **"Book Ticket"** button below to reserve seats and generate your instant e-Ticket & Boarding Pass!*`;
+    }
+
     return {
-      reply: isBengali ? flightTopic.answerBn : flightTopic.answerEn,
+      reply: flightReply,
       recommendations: flightCards,
-      suggestedAction: { target: 'flight-modal', label: isBengali ? 'ফ্লাইট টিকিট বুক ও পেমেন্ট' : 'Book Flight Ticket & Boarding Pass' },
+      suggestedAction: { target: 'flight-modal', label: lang === 'bn' ? 'ফ্লাইট টিকিট বুক ও পেমেন্ট' : lang === 'de' ? 'Flug buchen' : lang === 'ar' ? 'حجز تذكرة طيران' : 'Book Flight Ticket & Boarding Pass' },
       topicId: 'flights',
       flightSchedules: FLIGHT_SCHEDULES
     };
@@ -397,7 +441,7 @@ I have complete knowledge of our luxury hospitality ecosystem:
 - 👨‍🍳 **Kitchen KDS & Delivery**: Live cooking flow & simulated GPS rider transit.
 - 💳 **Billing & Invoices**: Itemized 10% VAT tax folios, bKash, Nagad, Visa/Mastercard.
 
-*Ask any question in English or বাংলা (Bengali)!*`;
+*Ask any question in English, German (Deutsch), Arabic, or বাংলা (Bengali)!*`;
 
   const fallbackBn = `**গ্র্যান্ড অরেলিয়া এন্টারপ্রাইজ নলেজ বেজ ও AI ChatBoot-এ স্বাগতম!**
 আমি এই প্ল্যাটফর্মের সকল বিষয়ে সম্পূর্ণ অভিজ্ঞ:
@@ -412,7 +456,7 @@ I have complete knowledge of our luxury hospitality ecosystem:
   return {
     reply: isBengali ? fallbackBn : fallbackEn,
     recommendations: [
-      { title: 'Emirates Dubai Flight (EK-583)', subtitle: 'Economy $380 • Business $850 • First $1,650', action: 'BOOK_FLIGHT', target: 'flight-modal' },
+      { title: 'Emirates Dubai Flight (EK-583)', subtitle: 'Economy $380 • Business $850 • First $1,650', action: 'BOOK_FLIGHT', target: 'flight-modal', flightData: FLIGHT_SCHEDULES[0] },
       { title: 'Deluxe Ocean Suite', subtitle: 'Sea View • $180/night', image: rooms[0]?.image, action: 'VIEW_ROOM', target: 'hotel' }
     ],
     suggestedAction: { target: 'overview', label: isBengali ? 'সম্পূর্ণ ড্যাশবোর্ড' : 'Explore Platform Dashboard' }

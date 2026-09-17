@@ -33,9 +33,25 @@ import {
   Calendar,
   Clock,
   Luggage,
-  Award
+  Award,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Languages,
+  Radio,
+  Trash2
 } from 'lucide-react';
-import { CLIENT_KNOWLEDGE_TOPICS, FREQUENT_QUESTIONS, FLIGHT_SCHEDULES, queryClientKnowledge } from '../projectKnowledge';
+import { CLIENT_KNOWLEDGE_TOPICS, FREQUENT_QUESTIONS, FLIGHT_SCHEDULES, queryClientKnowledge, detectLanguage } from '../projectKnowledge';
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'bn-BD', langCode: 'bn', label: 'বাংলা (Bengali)', flag: '🇧🇩', short: 'বাংলা' },
+  { code: 'en-US', langCode: 'en', label: 'English (US/UK)', flag: '🇺🇸', short: 'English' },
+  { code: 'de-DE', langCode: 'de', label: 'Deutsch (German)', flag: '🇩🇪', short: 'Deutsch' },
+  { code: 'ar-SA', langCode: 'ar', label: 'العربية (Arabic)', flag: '🇸🇦', short: 'العربية' },
+  { code: 'fr-FR', langCode: 'fr', label: 'Français (French)', flag: '🇫🇷', short: 'Français' },
+  { code: 'es-ES', langCode: 'es', label: 'Español (Spanish)', flag: '🇪🇸', short: 'Español' }
+];
 
 export default function AIChatModal({ 
   isOpen, 
@@ -53,8 +69,8 @@ export default function AIChatModal({
       sender: 'bot',
       text: `👋 **Welcome to Grand Aurelia AI ChatBoot & Global Travel Concierge!**
 
-I am your 24/7 intelligent concierge & knowledge engine for this entire luxury ecosystem:
-• ✈️ **Airlines & Flight Ticket Booking** (Emirates, Singapore Airlines, Qatar Airways, Domestic & Private Jets)
+I am your 24/7 multilingual intelligent concierge (বাংলা, English, Deutsch, العربية, Français, Español):
+• ✈️ **Airlines & Flight Ticket Booking** (Emirates Dubai, Singapore Airlines, Qatar Airways Qsuite, Domestic & Private Jets)
 • 🏨 **Luxury Suites & Pricing** (Ocean Suites, Business Suites, Presidential Penthouse)
 • 🚗 **Chauffeur & Yacht Charter** (Rolls-Royce Phantom, Maybach, 65ft Azure Private Yacht)
 • 💆 **Royal Spa & Thalassotherapy** (Moroccan Hammam, 24K Gold Facials & Hot Stone therapy)
@@ -62,7 +78,7 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
 • 🪑 **Table Reservations & POS** (Indoor Grand Hall, Terrace Garden, VIP Lounge)
 • 💳 **Invoices, Billing & Payments** (10% VAT folios, bKash, Nagad & Cards)
 
-*Ask any question in English or বাংলা (Bengali)! Click any quick topic above or ask below.*`,
+🎙️ *You can speak via Microphone or type in any language!*`,
       recommendations: [
         { 
           id: 'fl_01',
@@ -89,6 +105,14 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
   const [activeCategory, setActiveCategory] = useState('all');
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Voice Speech Recognition & Synthesis State
+  const [isListening, setIsListening] = useState(false);
+  const [selectedSpeechLang, setSelectedSpeechLang] = useState('bn-BD');
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState(null);
+  const [speechStatusText, setSpeechStatusText] = useState('');
+  const recognitionRef = useRef(null);
   
   // Flight Booking Dialog State
   const [selectedFlightForBooking, setSelectedFlightForBooking] = useState(null);
@@ -101,6 +125,7 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
   const [issuedTicket, setIssuedTicket] = useState(null);
 
   const chatEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -108,25 +133,155 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
     }
   }, [messages, isTyping, isOpen]);
 
+  // Clean up speech on unmount or close
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   if (!isOpen) return null;
+
+  // Toggle Voice Recognition
+  const toggleVoiceRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please try Google Chrome or Microsoft Edge.");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      setSpeechStatusText('');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = selectedSpeechLang;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === selectedSpeechLang);
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setSpeechStatusText(`🎙️ Listening in ${currentLangObj?.label || 'Selected Language'}... Speak now!`);
+      };
+
+      recognition.onresult = (event) => {
+        const current = event.resultIndex;
+        const transcript = event.results[current][0].transcript;
+        setInputVal(transcript);
+        if (event.results[current].isFinal) {
+          setIsListening(false);
+          setSpeechStatusText('');
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error);
+        setIsListening(false);
+        setSpeechStatusText('');
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        setSpeechStatusText('');
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error(err);
+      setIsListening(false);
+      setSpeechStatusText('');
+    }
+  };
+
+  // Text-to-Speech (TTS Audio Output)
+  const speakMessageText = (text, msgId) => {
+    if (!('speechSynthesis' in window)) {
+      alert("Text-to-speech is not supported in this browser.");
+      return;
+    }
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Clean markdown characters for pleasant voice reading
+    const cleanText = text
+      .replace(/[*#_`~>•-]/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/👋|✈️|🏨|🚗|💆|🍽️|🪑|💳|★|•|💵/g, '')
+      .trim();
+
+    const detectedLang = detectLanguage(cleanText);
+    let voiceLocale = 'en-US';
+    if (detectedLang === 'bn') voiceLocale = 'bn-BD';
+    else if (detectedLang === 'de') voiceLocale = 'de-DE';
+    else if (detectedLang === 'ar') voiceLocale = 'ar-SA';
+    else if (detectedLang === 'fr') voiceLocale = 'fr-FR';
+    else if (detectedLang === 'es') voiceLocale = 'es-ES';
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = voiceLocale;
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      setSpeakingMsgId(msgId);
+    };
+
+    utterance.onend = () => {
+      setSpeakingMsgId(null);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingMsgId(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Filtered prompt chips based on category
   const filteredPrompts = FREQUENT_QUESTIONS.filter(q => {
     if (activeCategory === 'all') return true;
-    if (activeCategory === 'flights') return q.query.toLowerCase().includes('flight') || q.query.toLowerCase().includes('dubai');
+    if (activeCategory === 'flights') return q.query.toLowerCase().includes('flight') || q.query.toLowerCase().includes('dubai') || q.query.includes('flüg');
     if (activeCategory === 'chauffeur_yacht') return q.query.toLowerCase().includes('rolls') || q.query.toLowerCase().includes('yacht');
     if (activeCategory === 'spa_wellness') return q.query.toLowerCase().includes('spa');
-    if (activeCategory === 'rooms') return q.query.toLowerCase().includes('suite') || q.query.toLowerCase().includes('room');
+    if (activeCategory === 'rooms') return q.query.toLowerCase().includes('suite') || q.query.toLowerCase().includes('room') || q.query.includes('zimmer');
     if (activeCategory === 'dining_menu') return q.query.toLowerCase().includes('food') || q.query.toLowerCase().includes('chef');
     if (activeCategory === 'tables') return q.query.toLowerCase().includes('table') || q.query.toLowerCase().includes('terrace');
     if (activeCategory === 'invoices_billing') return q.query.toLowerCase().includes('payment') || q.query.toLowerCase().includes('bill');
     if (activeCategory === 'bn') return q.query.includes('বাংলা') || q.query.includes('বিমান');
+    if (activeCategory === 'de') return q.query.includes('Flüg') || q.query.includes('Deutsch');
+    if (activeCategory === 'ar') return q.query.includes('حجز') || q.query.includes('طيران');
     return true;
   });
 
   const handleSendMessage = async (customText) => {
     const textToSend = customText || inputVal;
     if (!textToSend.trim()) return;
+
+    if (isListening && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+      setIsListening(false);
+      setSpeechStatusText('');
+    }
 
     const userMsg = { 
       id: `u_${Date.now()}`,
@@ -148,168 +303,146 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
       
       if (res.ok) {
         const data = await res.json();
-        setIsTyping(false);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `b_${Date.now()}`,
-            sender: 'bot',
-            text: data.reply,
-            recommendations: data.recommendations || [],
-            suggestedAction: data.suggestedAction,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-        return;
+        const botMsg = {
+          id: `b_${Date.now()}`,
+          sender: 'bot',
+          text: data.reply || data.message,
+          recommendations: data.recommendations,
+          suggestedAction: data.suggestedAction,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, botMsg]);
+      } else {
+        throw new Error('Fallback to client knowledge');
       }
-      throw new Error('Backend offline');
     } catch (err) {
-      setTimeout(() => {
-        const fallbackResult = queryClientKnowledge(textToSend, { rooms, menuItems, tables, orders });
-        setIsTyping(false);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `b_${Date.now()}`,
-            sender: 'bot',
-            text: fallbackResult.reply,
-            recommendations: fallbackResult.recommendations || [],
-            suggestedAction: fallbackResult.suggestedAction,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-      }, 400);
+      // Local client-side fallback knowledge engine
+      const clientResult = queryClientKnowledge(textToSend, { rooms, menuItems, tables, orders });
+      const fallbackMsg = {
+        id: `b_${Date.now()}`,
+        sender: 'bot',
+        text: clientResult.reply,
+        recommendations: clientResult.recommendations,
+        suggestedAction: clientResult.suggestedAction,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, fallbackMsg]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
+  const copyToClipboard = (text, idx) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  };
+
+  const handleClearChat = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+    }
+    setMessages([
+      {
+        id: 'welcome',
+        sender: 'bot',
+        text: `👋 **AI ChatBoot Reset Complete.**
+How may I assist you with airlines booking, suite reservations, chauffeur fleet, yacht charters, dining menus, or billing invoices today?
+
+🎙️ *Feel free to speak in Bengali, English, German, Arabic, French, or Spanish!*`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
+  };
+
   const handleOpenFlightBooking = (flight) => {
-    const flightObj = flight || FLIGHT_SCHEDULES[0];
-    setSelectedFlightForBooking(flightObj);
+    setSelectedFlightForBooking(flight);
+    setIssuedTicket(null);
     setSelectedClass('business');
     setSeatNumber('3A');
-    setIssuedTicket(null);
   };
 
   const handleConfirmFlightTicket = (e) => {
     e.preventDefault();
     if (!selectedFlightForBooking) return;
 
-    const price = selectedClass === 'firstSuite' 
-      ? selectedFlightForBooking.prices.firstSuite 
-      : selectedClass === 'business' 
-        ? selectedFlightForBooking.prices.business 
-        : selectedFlightForBooking.prices.economy;
+    const basePrice = selectedFlightForBooking.prices[selectedClass] || selectedFlightForBooking.prices.economy;
+    const finalPrice = basePrice;
+    const ticketRef = `GA-AIR-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const newTicket = {
-      ticketNumber: `ETKT-${Date.now().toString().slice(-6)}`,
-      bookingRef: `GA-AIR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
-      passengerName,
-      passport: passengerPassport,
-      phone: passengerPhone,
+      ticketNumber: ticketRef,
       airline: selectedFlightForBooking.airline,
       flightNumber: selectedFlightForBooking.flightNumber,
+      aircraft: selectedFlightForBooking.aircraft,
       from: selectedFlightForBooking.from,
       to: selectedFlightForBooking.to,
       departure: selectedFlightForBooking.departureTime,
       arrival: selectedFlightForBooking.arrivalTime,
       duration: selectedFlightForBooking.duration,
-      aircraft: selectedFlightForBooking.aircraft,
       cabinClass: selectedClass === 'firstSuite' ? 'First Class Suite' : selectedClass === 'business' ? 'Business Class' : 'Economy Class',
       seat: seatNumber || '3A',
-      gate: 'B14',
-      terminal: 'Terminal 2 (VIP)',
-      boardingTime: '45 mins prior to departure',
-      totalAmount: price,
+      passengerName: passengerName || 'Valued VIP Guest',
+      passport: passengerPassport || 'A09823190',
+      totalAmount: finalPrice,
       paymentMethod: flightPaymentMethod,
-      date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]
+      gate: 'VIP Gate 04',
+      terminal: 'Terminal 1 (Executive Concierge)',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     };
 
     setIssuedTicket(newTicket);
-    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
 
-    // Inject confirmation into chat
-    setMessages(prev => [
-      ...prev,
-      {
-        id: `ticket_${Date.now()}`,
-        sender: 'bot',
-        text: `🎉 **Flight Ticket & Boarding Pass Confirmed!**\n\n` +
-              `• **Passenger**: ${newTicket.passengerName} (Passport: ${newTicket.passport})\n` +
-              `• **Flight**: ${newTicket.airline} \`${newTicket.flightNumber}\` (${newTicket.from} ➔ ${newTicket.to})\n` +
-              `• **Cabin**: ${newTicket.cabinClass} | **Seat**: \`${newTicket.seat}\` | **Gate**: \`${newTicket.gate}\`\n` +
-              `• **Departure**: ${newTicket.departure} (${newTicket.date})\n` +
-              `• **Total Paid**: $${newTicket.totalAmount} (${newTicket.paymentMethod})\n\n` +
-              `*Your electronic boarding pass has been generated with VIP Airport Fast-Track & Grand Aurelia Limousine Transfer.*`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
+    try {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    } catch (err) {}
+
+    // Add confirmation message to chat
+    const ticketConfirmationMsg = {
+      id: `ticket_${Date.now()}`,
+      sender: 'bot',
+      text: `🎉 **Airlines Ticket Successfully Confirmed & Boarding Pass Issued!**
+• **Passenger**: ${newTicket.passengerName} (Passport: ${newTicket.passport})
+• **Flight**: ${newTicket.airline} \`${newTicket.flightNumber}\` (${newTicket.from} ➔ ${newTicket.to})
+• **Seat**: \`${newTicket.seat}\` (${newTicket.cabinClass})
+• **Total Paid**: $${newTicket.totalAmount} via ${newTicket.paymentMethod}
+• **e-Ticket Ref**: \`${newTicket.ticketNumber}\`
+
+*Your digital boarding pass with VIP QR code has been generated below!*`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, ticketConfirmationMsg]);
   };
 
-  const handleClearChat = () => {
-    setMessages([
-      {
-        id: 'welcome_reset',
-        sender: 'bot',
-        text: 'Conversation reset! How may I assist you today? Ask about flight tickets, luxury suites, chauffeur rentals, private yachts, dining, or invoices.',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
-  };
-
-  const copyToClipboard = (text, idx) => {
-    navigator.clipboard?.writeText(text);
-    setCopiedIdx(idx);
-    setTimeout(() => setCopiedIdx(null), 2000);
-  };
-
-  // Simple Markdown Formatter
   const renderFormattedText = (rawText) => {
-    if (!rawText) return null;
-
-    const lines = rawText.split('\n');
     return (
-      <div className="markdown-content">
-        {lines.map((line, lIdx) => {
-          if (!line.trim()) return <div key={lIdx} className="h-2" />;
-
-          // Bullet points
-          if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-            const content = line.trim().replace(/^[•\-]\s*/, '');
-            return (
-              <div key={lIdx} className="flex items-start gap-2 my-1 pl-1">
-                <span className="text-accent font-bold">•</span>
-                <span dangerouslySetInnerHTML={{ __html: parseInlineStyles(content) }} />
-              </div>
-            );
-          }
-
-          // Numbered lists
-          if (/^\d+\.\s/.test(line.trim())) {
-            const match = line.trim().match(/^(\d+\.)\s*(.*)/);
-            return (
-              <div key={lIdx} className="flex items-start gap-2 my-1 pl-1">
-                <span className="text-primary font-bold text-xs">{match?.[1]}</span>
-                <span dangerouslySetInnerHTML={{ __html: parseInlineStyles(match?.[2] || '') }} />
-              </div>
-            );
-          }
-
-          // Normal line
-          return (
-            <p key={lIdx} className="my-1" dangerouslySetInnerHTML={{ __html: parseInlineStyles(line) }} />
-          );
-        })}
-      </div>
+      <div 
+        className="markdown-content"
+        dangerouslySetInnerHTML={{ 
+          __html: formatTextToHtml(rawText) 
+        }} 
+      />
     );
   };
 
-  const parseInlineStyles = (str) => {
-    return str
+  const formatTextToHtml = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/\n\n/g, '<br/><br/>')
+      .replace(/\n/g, '<br/>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`([^`]+)`/g, '<code class="chat-code">$1</code>')
       .replace(/\$([0-9.]+)/g, '<span class="price-tag-inline">$$$1</span>');
   };
+
+  const activeLangObj = SUPPORTED_LANGUAGES.find(l => l.code === selectedSpeechLang) || SUPPORTED_LANGUAGES[0];
 
   return (
     <>
@@ -331,7 +464,7 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
                   <span className="ai-live-badge">Global Concierge & Aviation v3.0</span>
                 </div>
                 <p className="text-xs text-white opacity-80">
-                  Airlines & Flights • 6 Suites • 8 Tables • Gourmet Menu • 24/7 VIP
+                  Multilingual Voice • Airlines & Flights • 6 Suites • Fine Dining • Chauffeur & Yacht
                 </p>
               </div>
             </div>
@@ -340,7 +473,7 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
               <button 
                 className="btn-ghost text-white text-xs p-1" 
                 onClick={() => setIsExpanded(!isExpanded)}
-                title={isExpanded ? "Standard Size" : "Wider Expanded View"}
+                title={isExpanded ? "Standard Size (880px)" : "Wider Expanded View (1120px)"}
               >
                 {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
               </button>
@@ -441,6 +574,24 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
                 }}
               >
                 🇧🇩 বাংলা গাইড
+              </button>
+              <button 
+                className={`topic-pill ${activeCategory === 'de' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveCategory('de');
+                  handleSendMessage('Welche Flüge und Luxus-Suiten kann ich im Grand Aurelia buchen?');
+                }}
+              >
+                🇩🇪 Deutsch
+              </button>
+              <button 
+                className={`topic-pill ${activeCategory === 'ar' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveCategory('ar');
+                  handleSendMessage('كيف يمكنني حجز تذكرة طيران وجناح فاخر في فندق غراند أوريليا؟');
+                }}
+              >
+                🇸🇦 العربية
               </button>
             </div>
           </div>
@@ -584,18 +735,33 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-xs opacity-60 mt-2 pt-1 border-t border-color-subtle">
+                  <div className="flex items-center justify-between text-xs opacity-75 mt-2 pt-1.5 border-t border-color-subtle">
                     <span>{m.timestamp || 'Just now'}</span>
-                    {m.sender === 'bot' && (
-                      <button 
-                        className="btn-ghost text-xs p-0 opacity-75 hover:opacity-100 flex items-center gap-1"
-                        onClick={() => copyToClipboard(m.text, idx)}
-                        title="Copy response"
-                      >
-                        {copiedIdx === idx ? <Check size={11} className="text-success" /> : <Copy size={11} />}
-                        {copiedIdx === idx ? 'Copied' : 'Copy'}
-                      </button>
-                    )}
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Text-to-Speech Speak Button */}
+                      {m.sender === 'bot' && (
+                        <button 
+                          className={`btn-ghost text-xs p-1 flex items-center gap-1 ${speakingMsgId === (m.id || idx) ? 'text-accent font-bold animate-pulse' : 'text-muted'}`}
+                          onClick={() => speakMessageText(m.text, m.id || idx)}
+                          title={speakingMsgId === (m.id || idx) ? "Stop speaking" : "Listen in audio (TTS)"}
+                        >
+                          {speakingMsgId === (m.id || idx) ? <VolumeX size={13} className="text-accent" /> : <Volume2 size={13} />}
+                          <span>{speakingMsgId === (m.id || idx) ? 'Stop' : 'Listen'}</span>
+                        </button>
+                      )}
+
+                      {m.sender === 'bot' && (
+                        <button 
+                          className="btn-ghost text-xs p-1 opacity-80 hover:opacity-100 flex items-center gap-1 text-muted"
+                          onClick={() => copyToClipboard(m.text, idx)}
+                          title="Copy response"
+                        >
+                          {copiedIdx === idx ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+                          <span>{copiedIdx === idx ? 'Copied' : 'Copy'}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -632,25 +798,104 @@ I am your 24/7 intelligent concierge & knowledge engine for this entire luxury e
             ))}
           </div>
 
-          {/* Input Bar */}
+          {/* Live Voice Recording Status Bar */}
+          {isListening && (
+            <div className="ai-voice-listening-bar animate-fade-in">
+              <div className="flex items-center gap-2">
+                <div className="voice-pulse-indicator"></div>
+                <div className="voice-wave-eq">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span className="voice-status-text">{speechStatusText || 'Listening... Speak now'}</span>
+              </div>
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline-danger" 
+                onClick={toggleVoiceRecognition}
+              >
+                Stop Recording
+              </button>
+            </div>
+          )}
+
+          {/* Expanded Rich Input Bar */}
           <form 
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage();
             }} 
-            className="ai-chat-input-bar"
+            className="ai-chat-input-bar wider-input-bar"
           >
-            <div className="input-with-icon flex-1">
+            {/* Language Selector Dropdown Pill */}
+            <div className="speech-lang-container">
+              <button 
+                type="button" 
+                className="btn-speech-lang-pill"
+                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                title="Change Speech / Voice Language"
+              >
+                <span className="flag-icon">{activeLangObj.flag}</span>
+                <span className="lang-short">{activeLangObj.short}</span>
+                <Languages size={12} className="opacity-60" />
+              </button>
+
+              {showLangDropdown && (
+                <div className="speech-lang-dropdown shadow-lg animate-fade-in">
+                  <div className="dropdown-title">Select Speech / Input Language:</div>
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      className={`lang-option-row ${selectedSpeechLang === lang.code ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedSpeechLang(lang.code);
+                        setShowLangDropdown(false);
+                      }}
+                    >
+                      <span className="text-base">{lang.flag}</span>
+                      <span className="font-semibold text-xs flex-1 text-left">{lang.label}</span>
+                      {selectedSpeechLang === lang.code && <Check size={14} className="text-accent" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Input Field with Clear Button */}
+            <div className="input-with-icon flex-1 relative-input-wrap">
               <Search size={16} className="input-icon" />
               <input 
+                ref={inputRef}
                 type="text" 
-                placeholder="Ask about flights, airline tickets, luxury suites, yachts, menu, billing..." 
+                placeholder={`Ask in ${activeLangObj.short}, English, Deutsch, العربية (Flights, Suites, Yacht, Menu)...`} 
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
-                className="form-control with-icon ai-input"
+                className="form-control with-icon ai-input-wide"
                 autoFocus
               />
+              {inputVal && (
+                <button 
+                  type="button" 
+                  className="btn-clear-input"
+                  onClick={() => setInputVal('')}
+                  title="Clear text"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
+
+            {/* Microphone Voice Input Button */}
+            <button 
+              type="button"
+              className={`btn ai-mic-btn ${isListening ? 'listening-active' : ''}`}
+              onClick={toggleVoiceRecognition}
+              title={isListening ? "Stop voice listening" : `Voice input in ${activeLangObj.label}`}
+            >
+              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
+
+            {/* Send Button */}
             <button 
               type="submit" 
               className="btn btn-accent ai-send-btn" 
