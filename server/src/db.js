@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_FILE = path.join(__dirname, '../data/database.json');
 
 // Default initial seed data for IHG Enterprise Platform
 const initialData = {
@@ -544,14 +543,24 @@ const initialData = {
   ]
 };
 
+const DATA_FILE = process.env.VERCEL
+  ? path.join('/tmp', 'grand_aurelia_db.json')
+  : path.join(__dirname, '../data/database.json');
+
+let inMemoryDB = null;
+
 // Ensure data directory and database file exist
 function initDB() {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+  try {
+    const dataDir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    if (!fs.existsSync(DATA_FILE)) {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+    }
+  } catch (err) {
+    if (!inMemoryDB) inMemoryDB = JSON.parse(JSON.stringify(initialData));
   }
 }
 
@@ -559,17 +568,24 @@ function initDB() {
 export function getDB() {
   initDB();
   try {
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(raw);
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
   } catch (err) {
-    console.error('Error reading DB, resetting to initialData:', err);
-    saveDB(initialData);
-    return initialData;
+    // Fallback to in-memory
   }
+  if (!inMemoryDB) inMemoryDB = JSON.parse(JSON.stringify(initialData));
+  return inMemoryDB;
 }
 
 // Write database
 export function saveDB(data) {
-  initDB();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  inMemoryDB = data;
+  try {
+    initDB();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    // In-memory already updated
+  }
 }
