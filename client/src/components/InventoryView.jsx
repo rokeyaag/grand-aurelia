@@ -29,7 +29,7 @@ export default function InventoryView({ inventory, onRestock }) {
   const filteredItems = inventory.filter(item => {
     const matchesCat = activeCategory === 'ALL' || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.supplier.toLowerCase().includes(searchQuery.toLowerCase());
+                          (item.supplier || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
 

@@ -166,10 +166,10 @@ export default function RestaurantView({
                 {isOccupied && activeOrder && (
                   <div className="table-active-order-box">
                     <div className="flex items-center justify-between text-xs font-semibold">
-                      <span>Order #{activeOrder.orderNumber.slice(-4)}</span>
-                      <span className="text-accent">${activeOrder.total.toFixed(2)}</span>
+                      <span>Order #{activeOrder.orderNumber ? activeOrder.orderNumber.slice(-4) : 'Active'}</span>
+                      <span className="text-accent">${(activeOrder.totalAmount || activeOrder.total || 0).toFixed(2)}</span>
                     </div>
-                    <span className="text-xs text-muted block">{activeOrder.items.length} dishes in kitchen</span>
+                    <span className="text-xs text-muted block">{activeOrder.items ? activeOrder.items.length : 0} dishes in kitchen</span>
                   </div>
                 )}
               </div>
@@ -192,7 +192,7 @@ export default function RestaurantView({
                     className="btn btn-accent btn-sm w-full" 
                     onClick={() => onSettleBill(activeOrder.id)}
                   >
-                    <Receipt size={14} /> Settle Bill (${activeOrder.total.toFixed(2)})
+                    <Receipt size={14} /> Settle Bill (${(activeOrder.totalAmount || activeOrder.total || 0).toFixed(2)})
                   </button>
                 )}
 
