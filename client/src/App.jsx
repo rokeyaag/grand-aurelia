@@ -672,14 +672,15 @@ export default function App() {
 
       {/* Footer */}
       <footer className="ihg-footer">
-        <div className="container flex items-center justify-between">
-          <div className="text-xs text-muted">
-            © 2026 Grand Aurelia Luxury Hotel & Resort. All rights reserved. Enterprise Hospitality Management.
-          </div>
-          <div className="flex items-center gap-4 text-xs text-muted">
-            <span>Primary Brand: #1F3A5F</span>
-            <span>Secondary CTA: #FF2147</span>
-            <span>Live System: <strong className="text-success">Interactive & Operational</strong></span>
+        <div className="container">
+          <div className="footer-single-line">
+            <span>© 2026 <strong>Grand Aurelia</strong> Luxury Hotel & Resort</span>
+            <span className="footer-dot">•</span>
+            <span>Developer: <strong className="dev-name">Lutfor Rahman</strong></span>
+            <span className="footer-dot">•</span>
+            <span>Company: <strong className="dev-company">Lutfor IT Solution</strong></span>
+            <span className="footer-dot">•</span>
+            <span className="footer-system-status"><span className="pulse-indicator"></span> Live System</span>
           </div>
         </div>
       </footer>

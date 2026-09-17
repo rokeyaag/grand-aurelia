@@ -61,7 +61,7 @@ export default function GMDashboard({
 
       {/* KPI Cards Grid */}
       <div className="kpi-grid">
-        <div className="card kpi-card">
+        <div className="card kpi-card kpi-card-revenue">
           <div className="kpi-header">
             <span className="kpi-label">Total Platform Revenue</span>
             <div className="kpi-icon-wrapper" style={{ background: '#EBF1F8', color: '#1F3A5F' }}>
@@ -77,7 +77,7 @@ export default function GMDashboard({
           </div>
         </div>
 
-        <div className="card kpi-card">
+        <div className="card kpi-card kpi-card-occupancy">
           <div className="kpi-header">
             <span className="kpi-label">Hotel Occupancy Rate</span>
             <div className="kpi-icon-wrapper" style={{ background: '#EFF6FF', color: '#3B82F6' }}>
@@ -90,7 +90,7 @@ export default function GMDashboard({
           </div>
         </div>
 
-        <div className="card kpi-card">
+        <div className="card kpi-card kpi-card-orders">
           <div className="kpi-header">
             <span className="kpi-label">Active Orders (Dine & Delivery)</span>
             <div className="kpi-icon-wrapper" style={{ background: '#FFF0F2', color: '#FF2147' }}>
@@ -105,7 +105,7 @@ export default function GMDashboard({
           </div>
         </div>
 
-        <div className="card kpi-card">
+        <div className="card kpi-card kpi-card-alerts">
           <div className="kpi-header">
             <span className="kpi-label">Stock & Supply Alerts</span>
             <div className="kpi-icon-wrapper" style={{ background: '#FEF2F2', color: '#EF4444' }}>

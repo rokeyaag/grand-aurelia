@@ -271,12 +271,14 @@ input, select, textarea {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
   padding: 1.5rem;
-  transition: var(--transition);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 .card:hover {
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-hover);
+  box-shadow: 0 10px 24px -4px rgba(31, 58, 95, 0.10), 0 4px 8px -2px rgba(31, 58, 95, 0.04);
+  transform: translateY(-2px);
 }
 
 /* Progress bar */
@@ -523,10 +525,79 @@ input, select, textarea {
 }
 
 .ihg-footer {
-  background: #FFFFFF;
-  border-top: 1px solid var(--border-color);
-  padding: 1.25rem 0;
+  background: var(--primary);
+  color: #FFFFFF;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1rem 0;
   margin-top: auto;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.15);
+}
+
+.footer-single-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.815rem;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+}
+
+.footer-single-line strong {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.footer-single-line .dev-name {
+  color: #93C5FD;
+  font-weight: 700;
+}
+
+.footer-single-line .dev-company {
+  color: #FCD34D;
+  font-weight: 700;
+}
+
+.footer-dot {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.footer-system-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #A7F3D0;
+  font-weight: 600;
+  font-size: 0.75rem;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+}
+
+.pulse-indicator {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background-color: #10B981;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGreen {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 /* =========================================================
@@ -951,7 +1022,89 @@ input, select, textarea {
 }
 
 .kpi-card {
-  padding: 1.25rem;
+  padding: 1.35rem 1.4rem;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid #DCE5F0;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: transparent;
+  transition: all 0.25s ease;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px -4px rgba(31, 58, 95, 0.13), 0 6px 12px -2px rgba(31, 58, 95, 0.06);
+}
+
+/* Individual Matching Border & Hover Accent Lines for KPI Cards */
+.kpi-card-revenue {
+  border-color: #D6E2EF;
+}
+.kpi-card-revenue::before {
+  background: rgba(31, 58, 95, 0.2);
+}
+.kpi-card-revenue:hover {
+  border-color: #8FAFD5;
+}
+.kpi-card-revenue:hover::before {
+  background: linear-gradient(90deg, #1F3A5F, #3B82F6);
+}
+
+.kpi-card-occupancy {
+  border-color: #D7E6FA;
+}
+.kpi-card-occupancy::before {
+  background: rgba(59, 130, 246, 0.2);
+}
+.kpi-card-occupancy:hover {
+  border-color: #93C5FD;
+}
+.kpi-card-occupancy:hover::before {
+  background: linear-gradient(90deg, #2563EB, #60A5FA);
+}
+
+.kpi-card-orders {
+  border-color: #FDE5E9;
+}
+.kpi-card-orders::before {
+  background: rgba(255, 33, 71, 0.2);
+}
+.kpi-card-orders:hover {
+  border-color: #FDA4AF;
+}
+.kpi-card-orders:hover::before {
+  background: linear-gradient(90deg, #FF2147, #FB7185);
+}
+
+.kpi-card-alerts {
+  border-color: #FDE8E8;
+}
+.kpi-card-alerts::before {
+  background: rgba(239, 68, 68, 0.2);
+}
+.kpi-card-alerts:hover {
+  border-color: #FCA5A5;
+}
+.kpi-card-alerts:hover::before {
+  background: linear-gradient(90deg, #EF4444, #F59E0B);
+}
+
+.kpi-card:hover .kpi-icon-wrapper {
+  transform: scale(1.08);
 }
 
 .kpi-header {
@@ -974,6 +1127,7 @@ input, select, textarea {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.25s ease;
 }
 
 .kpi-value {
@@ -1008,8 +1162,16 @@ input, select, textarea {
 .revenue-split-card {
   background: var(--bg-subtle);
   border: 1px solid var(--border-color);
-  padding: 1rem;
+  padding: 1.1rem;
   border-radius: var(--radius-md);
+  transition: all 0.22s ease;
+}
+
+.revenue-split-card:hover {
+  border-color: var(--border-hover);
+  background: #FFFFFF;
+  box-shadow: 0 6px 16px -2px rgba(31, 58, 95, 0.08);
+  transform: translateY(-2px);
 }
 
 .quick-actions-bar {
@@ -1032,10 +1194,17 @@ input, select, textarea {
   display: flex;
   align-items: flex-start;
   gap: 0.85rem;
-  padding: 0.75rem;
+  padding: 0.85rem;
   border-radius: var(--radius-md);
   background: var(--bg-subtle);
   border: 1px solid var(--border-color);
+  transition: all 0.22s ease;
+}
+
+.activity-stream-item:hover {
+  border-color: var(--border-hover);
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(31, 58, 95, 0.06);
 }
 
 .activity-icon-badge {
