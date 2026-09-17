@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Sparkles } from 'lucide-react';
+import robotAvatar from './assets/ai_robot_avatar.jpg';
 import Header, { ROLES } from './components/Header';
 import GMDashboard from './components/GMDashboard';
 import HotelView from './components/HotelView';
@@ -644,7 +646,29 @@ export default function App() {
         onClose={() => setShowAIModal(false)}
         onNavigate={(tab) => setActiveTab(tab)}
         onAddToCart={handleAddToCart}
+        rooms={rooms || []}
+        menuItems={menuItems || []}
+        tables={tables || []}
+        orders={orders || []}
       />
+
+      {/* Floating 24/7 AI ChatBoot Trigger Button */}
+      <button 
+        className="floating-ai-trigger-btn"
+        onClick={() => setShowAIModal(true)}
+        title="Open Grand Aurelia AI ChatBoot & Knowledge Base"
+        aria-label="Open AI ChatBoot"
+      >
+        <span className="floating-ai-pulse"></span>
+        <div className="floating-ai-icon">
+          <img src={robotAvatar} alt="AI ChatBoot" className="floating-ai-robot-img" />
+        </div>
+        <div className="floating-ai-text">
+          <strong>AI ChatBoot</strong>
+          <span>Ask Knowledge Base</span>
+        </div>
+        <span className="floating-ai-badge">24/7</span>
+      </button>
 
       {/* Footer */}
       <footer className="ihg-footer">

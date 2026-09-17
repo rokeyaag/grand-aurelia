@@ -602,8 +602,8 @@ export default function HotelView({
       {/* 1. BOOK SUITE MODAL (Interactive, Rich, Luxury) */}
       {/* ========================================================= */}
       {selectedRoomForBooking && (
-        <div className="modal-overlay">
-          <div className="modal-content modal-large animate-fade-in">
+        <div className="modal-overlay" onClick={() => setSelectedRoomForBooking(null)}>
+          <div className="modal-content modal-large animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="flex items-center gap-3">
                 <div className="modal-icon-badge">
@@ -616,9 +616,24 @@ export default function HotelView({
                   </p>
                 </div>
               </div>
-              <button className="btn-ghost" onClick={() => setSelectedRoomForBooking(null)}>
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  type="button" 
+                  className="btn btn-outline btn-sm"
+                  onClick={() => {
+                    setGuestName('Dr. Sarah Mahmud');
+                    setGuestPhone('+880 1819 889900');
+                    setGuestEmail('sarah.mahmud@bangladesh.org');
+                    setGuestIdNumber('NID-8829104820');
+                  }}
+                  title="Auto-fill sample VIP guest data for quick demo"
+                >
+                  <Sparkles size={13} className="text-accent" /> Sample Data
+                </button>
+                <button className="btn-ghost" onClick={() => setSelectedRoomForBooking(null)}>
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             <form onSubmit={submitBooking} className="modal-body">
@@ -874,8 +889,8 @@ export default function HotelView({
       {/* 2. SUITE SHOWCASE / ROOM DETAILS MODAL */}
       {/* ========================================================= */}
       {selectedRoomForDetails && (
-        <div className="modal-overlay">
-          <div className="modal-content modal-large animate-fade-in">
+        <div className="modal-overlay" onClick={() => setSelectedRoomForDetails(null)}>
+          <div className="modal-content modal-large animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="flex items-center gap-3">
                 <Award size={22} className="text-accent" />
@@ -1021,8 +1036,8 @@ export default function HotelView({
       {/* 3. IN-ROOM SERVICE & AMENITIES MODAL */}
       {/* ========================================================= */}
       {selectedRoomForService && (
-        <div className="modal-overlay">
-          <div className="modal-content animate-fade-in">
+        <div className="modal-overlay" onClick={() => setSelectedRoomForService(null)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <Bell size={20} className="text-primary" />
@@ -1089,8 +1104,8 @@ export default function HotelView({
       {/* 4. ADD NEW SUITE MODAL */}
       {/* ========================================================= */}
       {showAddRoomModal && (
-        <div className="modal-overlay">
-          <div className="modal-content animate-fade-in">
+        <div className="modal-overlay" onClick={() => setShowAddRoomModal(false)}>
+          <div className="modal-content animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <Plus size={20} className="text-accent" />

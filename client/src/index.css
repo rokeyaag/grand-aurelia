@@ -1539,36 +1539,172 @@ input, select, textarea {
    AI CONCIERGE MODAL & FLOATING ASSISTANT
    ========================================================= */
 .ai-chat-overlay {
-  z-index: 1050;
+  z-index: 10050;
 }
 
 .ai-chat-modal {
-  max-width: 520px;
-  height: 650px;
+  width: 100%;
+  max-width: 880px;
+  height: 750px;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 33, 71, 0.18);
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-chat-modal.ai-chat-expanded {
+  max-width: 1120px;
+  width: 95vw;
+  height: 90vh;
 }
 
 .ai-chat-header {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #172B45 60%, var(--primary) 100%);
   color: #fff;
   padding: 1.15rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ai-avatar-badge {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
   background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 33, 71, 0.4);
 }
 
+/* Robotic AI Avatar Styles */
+.header-ai-robot-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1.5px solid #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  transition: var(--transition);
+}
+.ai-header-btn:hover .header-ai-robot-icon {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.floating-ai-robot-img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1.5px solid #38BDF8;
+}
+
+.robotic-badge {
+  position: relative;
+  overflow: visible !important;
+  background: #0F172A !important;
+  border: 2px solid #38BDF8;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.6) !important;
+}
+
+.modal-ai-robot-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.robotic-status-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 2px solid #0F172A;
+  box-shadow: 0 0 8px #10B981;
+}
+
+.chat-bot-robot-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1.5px solid #38BDF8;
+}
+
+.ai-live-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+/* Topic bar */
+.ai-topic-bar {
+  background: #F8FAFC;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.55rem 1rem;
+}
+
+.topic-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.topic-pills-scroll {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.topic-pill {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.topic-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-subtle);
+}
+
+.topic-pill.active {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Chat Body */
 .ai-chat-body {
   flex: 1;
   overflow-y: auto;
@@ -1576,21 +1712,22 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: var(--bg-subtle);
+  background: #F4F6F9;
 }
 
 .ai-message-row {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   align-items: flex-start;
 }
+
 .ai-message-row.user {
   flex-direction: row-reverse;
 }
 
 .ai-message-avatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
   background: var(--primary);
   color: #fff;
@@ -1598,43 +1735,112 @@ input, select, textarea {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 0.75rem;
+  box-shadow: var(--shadow-sm);
 }
+
 .ai-message-row.user .ai-message-avatar {
   background: var(--accent);
 }
 
 .ai-message-bubble {
-  max-width: 82%;
-  padding: 0.75rem 1rem;
+  max-width: 86%;
+  padding: 0.9rem 1.15rem;
   border-radius: var(--radius-lg);
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.875rem;
+  line-height: 1.5;
   background: #FFFFFF;
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  color: var(--text-main);
 }
+
 .ai-message-row.user .ai-message-bubble {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #FFFFFF;
   border-color: var(--primary);
 }
 
+.markdown-content strong {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.ai-message-row.user .markdown-content strong {
+  color: #FFFFFF;
+}
+
+.chat-code {
+  background: rgba(15, 23, 42, 0.08);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.price-tag-inline {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Recommendations */
 .ai-rec-cards-list {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
+
 .ai-rec-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.75rem;
   background: var(--bg-subtle);
   border: 1px solid var(--border-color);
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.85rem;
   border-radius: var(--radius-md);
+  transition: var(--transition);
 }
 
+.ai-rec-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-rec-img {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.ai-rec-info {
+  flex: 1;
+}
+
+.ai-rec-info strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--primary-dark);
+}
+
+/* Typing indicator */
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Quick Prompts */
 .ai-quick-prompts {
   display: flex;
   gap: 0.4rem;
@@ -1643,18 +1849,24 @@ input, select, textarea {
   background: #FFFFFF;
   border-top: 1px solid var(--border-color);
 }
+
 .quick-prompt-pill {
   white-space: nowrap;
   font-size: 0.725rem;
   font-weight: 600;
   color: var(--primary);
   background: var(--primary-subtle);
-  padding: 0.3rem 0.65rem;
+  border: 1px solid #D1E0EE;
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition);
 }
+
 .quick-prompt-pill:hover {
   background: var(--accent);
   color: #fff;
+  border-color: var(--accent);
 }
 
 .ai-chat-input-bar {
@@ -1667,35 +1879,554 @@ input, select, textarea {
 }
 
 .ai-input {
-  flex: 1;
+  width: 100%;
   border: 1px solid var(--border-color);
-  padding: 0.55rem 0.85rem;
+  padding: 0.65rem 0.85rem 0.65rem 2.25rem;
   border-radius: var(--radius-md);
   font-size: 0.85rem;
+  transition: var(--transition);
+}
+
+.ai-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.1);
 }
 
 .ai-send-btn {
-  padding: 0.55rem 0.85rem;
+  padding: 0.65rem 1rem;
+}
+
+/* =========================================================
+   AI FLIGHT TICKETS & SCHEDULE CARDS
+   ========================================================= */
+.ai-flight-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+}
+
+.ai-flight-ticket-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border: 1.5px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  padding: 0.9rem 1.1rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ai-flight-ticket-card:hover {
+  border-color: #38BDF8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.15);
+}
+
+.flight-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed #CBD5E1;
+  padding-bottom: 0.5rem;
+}
+
+.flight-card-header strong {
+  font-size: 0.875rem;
+  color: var(--primary-dark);
+}
+
+.flight-price-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+}
+
+.flight-route-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+}
+
+.route-stop {
+  display: flex;
+  flex-direction: column;
+}
+
+.airport-code {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  line-height: 1.2;
+}
+
+.flight-time {
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.flight-duration-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0.5rem;
+  flex: 1;
+}
+
+.duration-text {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.duration-line {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #94A3B8, #38BDF8, #94A3B8);
+  position: relative;
+  margin: 0.25rem 0;
+  border-radius: 2px;
+}
+
+.aircraft-text {
+  font-size: 0.65rem;
+  color: #0284C7;
+  font-weight: 600;
+}
+
+.flight-tiers-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tier-pill {
+  font-size: 0.675rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: #F1F5F9;
+  color: var(--text-secondary);
+  border: 1px solid #E2E8F0;
+}
+
+.tier-pill.business {
+  background: #E0F2FE;
+  color: #0369A1;
+  border-color: #BAE6FD;
+}
+
+.tier-pill.first {
+  background: #FEF3C7;
+  color: #B45309;
+  border-color: #FDE68A;
+}
+
+/* =========================================================
+   FLIGHT BOOKING MODAL & DIGITAL BOARDING PASS
+   ========================================================= */
+.flight-booking-overlay {
+  z-index: 10100;
+}
+
+.flight-booking-modal {
+  max-width: 720px;
+  max-height: 94vh;
+  overflow-y: auto;
+}
+
+.flight-summary-banner {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  color: #FFFFFF;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+}
+
+.flight-airplane-path {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+}
+
+.path-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38BDF8;
+  box-shadow: 0 0 6px #38BDF8;
+}
+
+.path-line {
+  width: 45px;
+  height: 2px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.4);
+}
+
+.cabin-classes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 680px) {
+  .cabin-classes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cabin-option-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.cabin-option-card input[type="radio"] {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  accent-color: var(--accent);
+}
+
+.cabin-option-card:hover {
+  border-color: #38BDF8;
+  background: var(--bg-subtle);
+}
+
+.cabin-option-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.cabin-option-card strong {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.cabin-option-card span {
+  display: block;
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.cabin-price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-top: auto;
+}
+
+/* Authentic Digital Boarding Pass */
+.boarding-pass-container {
+  padding: 1.5rem;
+  background: #F1F5F9;
+}
+
+.boarding-pass-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.08);
+  border: 1px solid #CBD5E1;
+  position: relative;
+}
+
+.boarding-pass-top {
+  background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);
+  color: #FFFFFF;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px dashed #CBD5E1;
+}
+
+.boarding-pass-badge {
+  background: #F59E0B;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.boarding-pass-body {
+  padding: 1.5rem;
+}
+
+.pass-route-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed #E2E8F0;
+  margin-bottom: 1.25rem;
+}
+
+.route-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-city {
+  font-size: 1.35rem;
+  font-weight: 900;
+  font-family: var(--font-display);
+  color: var(--primary-dark);
+}
+
+.route-airport {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  max-width: 150px;
+}
+
+.route-time {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 0.2rem;
+}
+
+.route-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.flight-id-tag {
+  font-size: 0.8rem;
+  font-weight: 800;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.flight-nonstop {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.pass-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed #E2E8F0;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .pass-details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pass-detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.pass-detail-item .label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pass-detail-item strong {
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.pass-barcode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #E2E8F0;
+}
+
+.barcode-mock {
+  width: 140px;
+  height: 38px;
+  background: repeating-linear-gradient(
+    90deg,
+    #000,
+    #000 2px,
+    #fff 2px,
+    #fff 4px,
+    #000 4px,
+    #000 7px,
+    #fff 7px,
+    #fff 9px
+  );
+  border-radius: 2px;
+}
+
+/* =========================================================
+   FLOATING 24/7 AI TRIGGER BUTTON
+   ========================================================= */
+.floating-ai-trigger-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, #162B46 100%);
+  color: #FFFFFF;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid rgba(255, 33, 71, 0.4);
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.3), 0 4px 12px rgba(255, 33, 71, 0.3);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-ai-trigger-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35), 0 6px 18px rgba(255, 33, 71, 0.45);
+  border-color: var(--accent);
+}
+
+.floating-ai-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255, 33, 71, 0.5);
+}
+
+.floating-ai-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.floating-ai-text strong {
+  font-size: 0.85rem;
+  line-height: 1.2;
+  color: #FFFFFF;
+}
+
+.floating-ai-text span {
+  font-size: 0.7rem;
+  color: #CBD5E1;
+  line-height: 1.2;
+}
+
+.floating-ai-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #F59E0B;
+  color: #000;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+}
+
+.floating-ai-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--accent);
+  animation: aiPulseRipple 2.4s infinite;
+  pointer-events: none;
+}
+
+@keyframes aiPulseRipple {
+  0% { transform: scale(1); opacity: 0.8; }
+  70% { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1.15); opacity: 0; }
 }
 
 /* Forms and Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.25rem;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--border-color);
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
+  background: #FFFFFF;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
 }
 .modal-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding-top: 1.25rem;
+  padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--border-color);
+  background: #FFFFFF;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 
 .form-group {

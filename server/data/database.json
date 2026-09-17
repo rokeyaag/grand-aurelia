@@ -196,9 +196,55 @@
       "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600",
       "currentGuest": null,
       "cleaningStatus": "Maintenance Required"
+    },
+    {
+      "id": "rm_1789625821363_tx4k",
+      "tier": "Luxury Suite",
+      "floor": 2,
+      "pricePerNight": 200,
+      "capacity": 2,
+      "bedType": "1 King Bed",
+      "size": "45 m²",
+      "status": "Available",
+      "amenities": [
+        "High-Speed Wi-Fi",
+        "Smart TV",
+        "Air Conditioning",
+        "Ensuite Bathroom",
+        "Mini Bar"
+      ],
+      "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600",
+      "cleaningStatus": "Clean",
+      "number": "402",
+      "type": "Royal Heritage Suite"
     }
   ],
   "bookings": [
+    {
+      "id": "bk_1789625376590_68p6",
+      "bookingNumber": "AGH-BK-6590",
+      "roomId": "rm_102",
+      "roomNumber": "102",
+      "guestName": "Lutfor Rahman",
+      "guestEmail": "lutforitsolution@gmail.com",
+      "guestPhone": "+8801908987817",
+      "guestIdNumber": "A 09823190",
+      "checkInDate": "2026-09-17",
+      "checkOutDate": "2026-09-20",
+      "nights": 3,
+      "totalGuests": 2,
+      "pricePerNight": 220,
+      "totalAmount": 705,
+      "paidAmount": 705,
+      "paymentStatus": "Paid",
+      "paymentMethod": "Credit Card (Visa/Mastercard)",
+      "status": "Confirmed",
+      "specialRequests": "",
+      "addons": [
+        "Airport Limousine Transfer ($45)"
+      ],
+      "createdAt": "2026-09-17T06:09:36.590Z"
+    },
     {
       "id": "bk_1001",
       "bookingNumber": "IHG-BK-2026-8801",
@@ -838,6 +884,21 @@
     }
   ],
   "invoices": [
+    {
+      "id": "inv_1789625376590_kr64",
+      "invoiceNumber": "INV-6590",
+      "guestName": "Lutfor Rahman",
+      "roomNumber": "102",
+      "roomTotal": 705,
+      "diningTotal": 0,
+      "tax": 70.5,
+      "netTotal": 775.5,
+      "paidAmount": 775.5,
+      "balanceDue": 0,
+      "status": "Paid",
+      "paymentMethod": "Credit Card (Visa/Mastercard)",
+      "date": "2026-09-17"
+    },
     {
       "id": "inv_9001",
       "invoiceNumber": "INV-2026-0091",

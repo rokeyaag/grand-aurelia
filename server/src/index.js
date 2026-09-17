@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDB, saveDB } from './db.js';
+import { queryKnowledgeBase, PROJECT_OVERVIEW, KNOWLEDGE_TOPICS } from './knowledgeBase.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -160,13 +161,31 @@ app.post('/api/bookings', (req, res) => {
   try {
     const db = getDB();
     if (!db.bookings) db.bookings = [];
-    const { roomId, guestName, guestEmail, guestPhone, checkInDate, checkOutDate, nights, totalGuests, specialRequests } = req.body;
+    const { 
+      roomId, 
+      roomNumber,
+      guestName, 
+      guestEmail, 
+      guestPhone, 
+      guestIdNumber,
+      checkInDate, 
+      checkOutDate, 
+      nights, 
+      totalGuests, 
+      pricePerNight,
+      totalAmount,
+      addons,
+      paymentMethod,
+      specialRequests,
+      status
+    } = req.body;
 
-    const room = (db.rooms || []).find((r) => r.id === roomId);
+    const room = (db.rooms || []).find((r) => r.id === roomId || r.number === roomNumber);
     if (!room) return res.status(404).json({ error: 'Room not found' });
 
     const nightsCount = Number(nights) || 1;
-    const totalAmount = (room.pricePerNight || 100) * nightsCount;
+    const finalTotal = totalAmount ? Number(totalAmount) : (room.pricePerNight || 100) * nightsCount;
+    const bookingStatus = status || 'Confirmed';
 
     const newBooking = {
       id: genId('bk'),
@@ -176,21 +195,48 @@ app.post('/api/bookings', (req, res) => {
       guestName: guestName || 'Guest',
       guestEmail: guestEmail || 'guest@example.com',
       guestPhone: guestPhone || '+880 1800 000000',
+      guestIdNumber: guestIdNumber || '',
       checkInDate: checkInDate || new Date().toISOString().split('T')[0],
       checkOutDate: checkOutDate || new Date(Date.now() + 86400000 * nightsCount).toISOString().split('T')[0],
       nights: nightsCount,
       totalGuests: Number(totalGuests) || 1,
-      pricePerNight: room.pricePerNight || 100,
-      totalAmount,
-      paidAmount: totalAmount,
+      pricePerNight: pricePerNight || room.pricePerNight || 100,
+      totalAmount: finalTotal,
+      paidAmount: finalTotal,
       paymentStatus: 'Paid',
-      paymentMethod: 'Credit Card / Online',
-      status: 'Confirmed',
+      paymentMethod: paymentMethod || 'Credit Card / Online',
+      status: bookingStatus,
       specialRequests: specialRequests || '',
+      addons: addons || [],
       createdAt: new Date().toISOString()
     };
 
     db.bookings.unshift(newBooking);
+
+    if (bookingStatus === 'Checked-In') {
+      room.status = 'Occupied';
+      room.currentGuest = guestName || 'Guest';
+    }
+
+    // Save corresponding invoice
+    if (!db.invoices) db.invoices = [];
+    const newInvoice = {
+      id: genId('inv'),
+      invoiceNumber: `INV-${Date.now().toString().slice(-4)}`,
+      guestName: guestName || 'Guest',
+      roomNumber: room.number,
+      roomTotal: Number(finalTotal),
+      diningTotal: 0.0,
+      tax: Number((finalTotal * 0.1).toFixed(2)),
+      netTotal: Number((finalTotal * 1.1).toFixed(2)),
+      paidAmount: Number((finalTotal * 1.1).toFixed(2)),
+      balanceDue: 0.0,
+      status: 'Paid',
+      paymentMethod: paymentMethod || 'Credit Card (Visa)',
+      date: new Date().toISOString().split('T')[0]
+    };
+    db.invoices.unshift(newInvoice);
+
     saveDB(db);
     res.status(201).json(newBooking);
   } catch (err) {
@@ -836,61 +882,39 @@ app.get('/api/analytics', (req, res) => {
 });
 
 // ----------------------------------------------------
-// AI CONCIERGE & RECOMMENDATION ENGINE
 // ----------------------------------------------------
+// AI CONCIERGE & KNOWLEDGE BASE ENGINE
+// ----------------------------------------------------
+app.get('/api/knowledge-base', (req, res) => {
+  try {
+    const db = getDB();
+    res.json({
+      overview: PROJECT_OVERVIEW,
+      topics: KNOWLEDGE_TOPICS,
+      liveStats: {
+        totalRooms: (db.rooms || []).length,
+        availableRooms: (db.rooms || []).filter(r => r.status === 'Available').length,
+        occupiedRooms: (db.rooms || []).filter(r => r.status === 'Occupied').length,
+        totalTables: (db.tables || []).length,
+        availableTables: (db.tables || []).filter(t => t.status === 'Available').length,
+        totalMenuItems: (db.menuItems || []).length,
+        activeOrders: (db.orders || []).filter(o => o.status !== 'Delivered' && o.status !== 'Completed').length,
+        totalInvoices: (db.invoices || []).length
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve knowledge base', details: err.message });
+  }
+});
+
 app.post('/api/ai/concierge', (req, res) => {
   try {
     const { query } = req.body;
     const db = getDB();
-    const q = (query || '').toLowerCase();
-
-    let reply = '';
-    let recommendations = [];
-    let suggestedAction = null;
-
-    const rooms = db.rooms || [];
-    const menuItems = db.menuItems || [];
-
-    if (q.includes('room') || q.includes('suite') || q.includes('book') || q.includes('stay')) {
-      const available = rooms.filter((r) => r.status === 'Available');
-      reply = `We have ${available.length} luxury suites available today at Grand Aurelia. Would you like to reserve the Presidential Penthouse or the Deluxe Ocean Suite?`;
-      recommendations = available.slice(0, 2).map((r) => ({
-        title: r.type,
-        subtitle: `$${r.pricePerNight}/night • ${r.bedType}`,
-        image: r.image,
-        action: 'VIEW_ROOM',
-        id: r.id
-      }));
-      suggestedAction = { type: 'NAVIGATE', target: 'hotel-rooms', label: 'Explore Luxury Suites' };
-    } else if (q.includes('food') || q.includes('menu') || q.includes('eat') || q.includes('dinner') || q.includes('recommend') || q.includes('steak') || q.includes('dessert')) {
-      const specials = menuItems.filter((m) => m.isChefSpecial || m.rating >= 4.8);
-      reply = `Our Executive Chef at Grand Aurelia recommends the **Prime Wagyu Ribeye Steak** and **Atlantic Salmon Fillet**. For dessert, try our Molten Belgian Lava Cake!`;
-      recommendations = specials.slice(0, 3).map((m) => ({
-        title: m.name,
-        subtitle: `$${m.price.toFixed(2)} • ${m.category} • ★ ${m.rating}`,
-        image: m.image,
-        action: 'ORDER_FOOD',
-        id: m.id
-      }));
-      suggestedAction = { type: 'NAVIGATE', target: 'restaurant-menu', label: 'View Dining & Delivery Menu' };
-    } else if (q.includes('towel') || q.includes('clean') || q.includes('amenities') || q.includes('housekeeping')) {
-      reply = `I will dispatch Grand Aurelia housekeeping to your suite right away. What amenities would you like us to deliver?`;
-      suggestedAction = { type: 'OPEN_MODAL', target: 'in-room-service', label: 'Request Housekeeping' };
-    } else if (q.includes('table') || q.includes('reserve') || q.includes('reservation')) {
-      reply = `We have available tables at our Terrace Garden and Main Fine Dining room tonight. Shall I hold a table for you?`;
-      suggestedAction = { type: 'NAVIGATE', target: 'table-reservations', label: 'Reserve Table Now' };
-    } else {
-      reply = `Welcome to Grand Aurelia! I am your 24/7 AI Concierge. I can assist with suite bookings, table reservations, in-room dining, or housekeeping. How may I assist you?`;
-      recommendations = [
-        { title: menuItems[0]?.name || 'Prime Wagyu Ribeye', subtitle: 'Chef Signature Dish', image: menuItems[0]?.image, action: 'ORDER_FOOD', id: 'm_01' },
-        { title: rooms[0]?.type || 'Deluxe Ocean Suite', subtitle: 'Best Sea View', image: rooms[0]?.image, action: 'VIEW_ROOM', id: 'rm_101' }
-      ];
-    }
+    const result = queryKnowledgeBase(query, db);
 
     res.json({
-      reply,
-      recommendations,
-      suggestedAction,
+      ...result,
       timestamp: new Date().toISOString()
     });
   } catch (err) {

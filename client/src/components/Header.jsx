@@ -1,4 +1,5 @@
 import React from 'react';
+import robotAvatar from '../assets/ai_robot_avatar.jpg';
 import { 
   Building2, 
   Utensils, 
@@ -75,10 +76,10 @@ export default function Header({
             <button 
               className="btn btn-primary btn-sm ai-header-btn" 
               onClick={onOpenAI}
-              title="Open 24/7 AI Concierge"
+              title="Open 24/7 AI ChatBoot"
             >
-              <Sparkles size={15} className="text-amber-300" />
-              <span>AI Concierge</span>
+              <img src={robotAvatar} alt="AI ChatBoot" className="header-ai-robot-icon" />
+              <span>AI ChatBoot</span>
             </button>
 
             {/* Food Delivery Cart Icon */}
