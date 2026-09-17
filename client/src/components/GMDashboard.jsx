@@ -15,6 +15,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 
+import GMBannerCarousel from './GMBannerCarousel';
+
 export default function GMDashboard({ 
   analytics, 
   inventory = [], 
@@ -50,23 +52,12 @@ export default function GMDashboard({
 
   return (
     <div className="dashboard-container animate-fade-in">
-      {/* Welcome Banner */}
-      <div className="gm-banner">
-        <div className="gm-banner-content">
-          <div className="badge badge-primary" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none' }}>
-            <Sparkles size={13} /> Executive Control Hub
-          </div>
-          <h1>Enterprise Hospitality Overview</h1>
-          <p>
-            Real-time unified intelligence across Hotel Operations, Fine Dining, Kitchen KDS & Food Delivery Fleet.
-          </p>
-        </div>
-        <div className="gm-banner-actions">
-          <button className="btn btn-outline btn-sm" onClick={onRefresh} style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
-            <RefreshCw size={15} /> Refresh Live Data
-          </button>
-        </div>
-      </div>
+      {/* Dynamic 5-Slide Welcome Carousel Banner */}
+      <GMBannerCarousel 
+        rooms={rooms}
+        onRefresh={onRefresh}
+        onNavigate={onNavigate}
+      />
 
       {/* KPI Cards Grid */}
       <div className="kpi-grid">
