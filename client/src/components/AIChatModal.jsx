@@ -742,12 +742,12 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
                       {/* Text-to-Speech Speak Button */}
                       {m.sender === 'bot' && (
                         <button 
-                          className={`btn-ghost text-xs p-1 flex items-center gap-1 ${speakingMsgId === (m.id || idx) ? 'text-accent font-bold animate-pulse' : 'text-muted'}`}
+                          className={`btn-tts-listen ${speakingMsgId === (m.id || idx) ? 'speaking' : ''}`}
                           onClick={() => speakMessageText(m.text, m.id || idx)}
-                          title={speakingMsgId === (m.id || idx) ? "Stop speaking" : "Listen in audio (TTS)"}
+                          title={speakingMsgId === (m.id || idx) ? "Stop speaking" : "Listen to answer (Audio TTS)"}
                         >
-                          {speakingMsgId === (m.id || idx) ? <VolumeX size={13} className="text-accent" /> : <Volume2 size={13} />}
-                          <span>{speakingMsgId === (m.id || idx) ? 'Stop' : 'Listen'}</span>
+                          {speakingMsgId === (m.id || idx) ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                          <span>{speakingMsgId === (m.id || idx) ? 'Stop Voice' : 'Listen 🔊'}</span>
                         </button>
                       )}
 
@@ -885,14 +885,15 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
               )}
             </div>
 
-            {/* Microphone Voice Input Button */}
+            {/* Colorful Microphone Voice Input Button */}
             <button 
               type="button"
               className={`btn ai-mic-btn ${isListening ? 'listening-active' : ''}`}
               onClick={toggleVoiceRecognition}
-              title={isListening ? "Stop voice listening" : `Voice input in ${activeLangObj.label}`}
+              title={isListening ? "Stop voice listening" : `Voice Input (${activeLangObj.label}) - Click to speak!`}
             >
-              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              {isListening ? <MicOff size={20} className="mic-icon-svg" /> : <Mic size={20} className="mic-icon-svg" />}
+              <span className="mic-voice-tag">{isListening ? 'REC' : 'VOICE'}</span>
             </button>
 
             {/* Send Button */}
