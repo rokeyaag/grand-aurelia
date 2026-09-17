@@ -923,10 +923,10 @@ app.use((err, req, res, next) => {
 process.on('uncaughtException', (err) => {
   console.error('[Grand Aurelia Uncaught Exception]', err);
 });
-process.on('unhandledRejection', (reason) => {
-  console.error('[Grand Aurelia Unhandled Rejection]', reason);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`[Grand Aurelia Server] Running on http://localhost:${PORT}`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`[Grand Aurelia Server] Running on http://localhost:${PORT}`);
-});
+export default app;
