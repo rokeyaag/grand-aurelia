@@ -1,6 +1,12 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getDB, saveDB } from './db.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,7 +29,8 @@ const genId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'IHG Enterprise Backend REST API is running smoothly',
+    brand: 'Grand Aurelia Hospitality Enterprise',
+    message: 'Backend REST API is operational',
     timestamp: new Date().toISOString(),
     uptime: Math.round(process.uptime())
   });
@@ -163,7 +170,7 @@ app.post('/api/bookings', (req, res) => {
 
     const newBooking = {
       id: genId('bk'),
-      bookingNumber: `IHG-BK-${Date.now().toString().slice(-4)}`,
+      bookingNumber: `AGH-BK-${Date.now().toString().slice(-4)}`,
       roomId: room.id,
       roomNumber: room.number,
       guestName: guestName || 'Guest',
@@ -255,7 +262,7 @@ app.post('/api/bookings/:id/checkout', (req, res) => {
       assignedTo: 'Farhana Akter',
       priority: 'High',
       status: 'Pending',
-      notes: `Room ${booking.roomNumber} vacated by ${booking.guestName}. Full turnover needed.`,
+      notes: `Suite ${booking.roomNumber} vacated by ${booking.guestName}. Full turnover needed.`,
       scheduledAt: new Date().toISOString(),
       completedAt: null
     };
@@ -460,7 +467,7 @@ app.post('/api/table-reservations', (req, res) => {
     if (!db.tableReservations) db.tableReservations = [];
     const newReservation = {
       id: genId('res'),
-      reservationNumber: `IHG-TB-${Date.now().toString().slice(-3)}`,
+      reservationNumber: `AGH-TB-${Date.now().toString().slice(-3)}`,
       status: 'Confirmed',
       ...req.body
     };
@@ -574,7 +581,7 @@ app.post('/api/orders/dine-in', (req, res) => {
 
     const newOrder = {
       id: genId('ord_dine'),
-      orderNumber: `IHG-ORD-${Date.now().toString().slice(-4)}`,
+      orderNumber: `AGH-ORD-${Date.now().toString().slice(-4)}`,
       orderType: 'DINE_IN',
       tableNumber: tableNumber || 'T-01',
       waiterName: waiterName || 'Tanvir Hossain',
@@ -623,9 +630,9 @@ app.post('/api/orders/delivery', (req, res) => {
 
     const newOrder = {
       id: genId('ord_deliv'),
-      orderNumber: `IHG-FD-${Date.now().toString().slice(-4)}`,
+      orderNumber: `AGH-FD-${Date.now().toString().slice(-4)}`,
       orderType: 'DELIVERY',
-      customerName: customerName || 'Valued Customer',
+      customerName: customerName || 'Valued Guest',
       customerPhone: customerPhone || '+880 1700 000000',
       deliveryAddress: deliveryAddress || 'Dhaka, Bangladesh',
       deliveryNotes: deliveryNotes || '',
@@ -719,7 +726,7 @@ app.post('/api/inventory', (req, res) => {
       unit: 'pcs',
       unitCost: 10.00,
       status: 'Optimal',
-      supplier: 'IHG Central Supplies',
+      supplier: 'Grand Aurelia Central Supplies',
       ...req.body
     };
     db.inventory.push(newItem);
@@ -846,7 +853,7 @@ app.post('/api/ai/concierge', (req, res) => {
 
     if (q.includes('room') || q.includes('suite') || q.includes('book') || q.includes('stay')) {
       const available = rooms.filter((r) => r.status === 'Available');
-      reply = `We have ${available.length} premium suites available right now! Would you like to view our luxurious Presidential Penthouse or the Deluxe Ocean Suite?`;
+      reply = `We have ${available.length} luxury suites available today at Grand Aurelia. Would you like to reserve the Presidential Penthouse or the Deluxe Ocean Suite?`;
       recommendations = available.slice(0, 2).map((r) => ({
         title: r.type,
         subtitle: `$${r.pricePerNight}/night • ${r.bedType}`,
@@ -854,10 +861,10 @@ app.post('/api/ai/concierge', (req, res) => {
         action: 'VIEW_ROOM',
         id: r.id
       }));
-      suggestedAction = { type: 'NAVIGATE', target: 'hotel-rooms', label: 'Explore All Suites' };
+      suggestedAction = { type: 'NAVIGATE', target: 'hotel-rooms', label: 'Explore Luxury Suites' };
     } else if (q.includes('food') || q.includes('menu') || q.includes('eat') || q.includes('dinner') || q.includes('recommend') || q.includes('steak') || q.includes('dessert')) {
       const specials = menuItems.filter((m) => m.isChefSpecial || m.rating >= 4.8);
-      reply = `Our Executive Chef highly recommends the **Prime Wagyu Ribeye Steak** and the **Pan-seared Atlantic Salmon Fillet**. For dessert, our Belgian Chocolate Lava Cake is a guest favorite!`;
+      reply = `Our Executive Chef at Grand Aurelia recommends the **Prime Wagyu Ribeye Steak** and **Atlantic Salmon Fillet**. For dessert, try our Molten Belgian Lava Cake!`;
       recommendations = specials.slice(0, 3).map((m) => ({
         title: m.name,
         subtitle: `$${m.price.toFixed(2)} • ${m.category} • ★ ${m.rating}`,
@@ -867,13 +874,13 @@ app.post('/api/ai/concierge', (req, res) => {
       }));
       suggestedAction = { type: 'NAVIGATE', target: 'restaurant-menu', label: 'View Dining & Delivery Menu' };
     } else if (q.includes('towel') || q.includes('clean') || q.includes('amenities') || q.includes('housekeeping')) {
-      reply = `I can dispatch housekeeping to your room right away for fresh linens, extra luxury towels, or room tidying. What would you like us to bring?`;
+      reply = `I will dispatch Grand Aurelia housekeeping to your suite right away. What amenities would you like us to deliver?`;
       suggestedAction = { type: 'OPEN_MODAL', target: 'in-room-service', label: 'Request Housekeeping' };
     } else if (q.includes('table') || q.includes('reserve') || q.includes('reservation')) {
-      reply = `We have available tables at our Terrace Garden and Main Fine Dining areas tonight. Would you like me to hold a table for you?`;
+      reply = `We have available tables at our Terrace Garden and Main Fine Dining room tonight. Shall I hold a table for you?`;
       suggestedAction = { type: 'NAVIGATE', target: 'table-reservations', label: 'Reserve Table Now' };
     } else {
-      reply = `Welcome to International Hospitality Group! I am your 24/7 AI Concierge. I can assist you with booking suites, ordering gourmet dining to your room, reserving restaurant tables, or requesting housekeeping amenities. How may I assist your stay today?`;
+      reply = `Welcome to Grand Aurelia! I am your 24/7 AI Concierge. I can assist with suite bookings, table reservations, in-room dining, or housekeeping. How may I assist you?`;
       recommendations = [
         { title: menuItems[0]?.name || 'Prime Wagyu Ribeye', subtitle: 'Chef Signature Dish', image: menuItems[0]?.image, action: 'ORDER_FOOD', id: 'm_01' },
         { title: rooms[0]?.type || 'Deluxe Ocean Suite', subtitle: 'Best Sea View', image: rooms[0]?.image, action: 'VIEW_ROOM', id: 'rm_101' }
@@ -891,25 +898,35 @@ app.post('/api/ai/concierge', (req, res) => {
   }
 });
 
-// Global 404 Handler
+// Production Static Serving (Single Full-stack URL)
+const clientDistPath = path.join(__dirname, '../../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
+// Global 404 Handler for API routes
 app.use((req, res) => {
-  res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found on IHG Server` });
+  res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found on Grand Aurelia Server` });
 });
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('[IHG Server Error]', err);
+  console.error('[Grand Aurelia Server Error]', err);
   res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
 // Global Uncaught Handlers
 process.on('uncaughtException', (err) => {
-  console.error('[IHG Uncaught Exception]', err);
+  console.error('[Grand Aurelia Uncaught Exception]', err);
 });
 process.on('unhandledRejection', (reason) => {
-  console.error('[IHG Unhandled Rejection]', reason);
+  console.error('[Grand Aurelia Unhandled Rejection]', reason);
 });
 
 app.listen(PORT, () => {
-  console.log(`[IHG Server] Running on http://localhost:${PORT}`);
+  console.log(`[Grand Aurelia Server] Running on http://localhost:${PORT}`);
 });
