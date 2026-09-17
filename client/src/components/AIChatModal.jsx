@@ -739,15 +739,20 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
                     <span>{m.timestamp || 'Just now'}</span>
                     
                     <div className="flex items-center gap-2">
-                      {/* Text-to-Speech Speak Button */}
+                      {/* 3D Speaker Emoji / Logo Type Audio Output Button */}
                       {m.sender === 'bot' && (
                         <button 
-                          className={`btn-tts-listen ${speakingMsgId === (m.id || idx) ? 'speaking' : ''}`}
+                          className={`btn-tts-speaker-pill ${speakingMsgId === (m.id || idx) ? 'speaking' : ''}`}
                           onClick={() => speakMessageText(m.text, m.id || idx)}
-                          title={speakingMsgId === (m.id || idx) ? "Stop speaking" : "Listen to answer (Audio TTS)"}
+                          title={speakingMsgId === (m.id || idx) ? "Stop speaking" : "Listen to answer via Speaker (Audio TTS)"}
                         >
-                          {speakingMsgId === (m.id || idx) ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                          <span>{speakingMsgId === (m.id || idx) ? 'Stop Voice' : 'Listen 🔊'}</span>
+                          <span className="speaker-emoji-logo">{speakingMsgId === (m.id || idx) ? '🔊' : '📢'}</span>
+                          <span className="speaker-btn-text">{speakingMsgId === (m.id || idx) ? 'Playing...' : 'Speaker 🔊'}</span>
+                          {speakingMsgId === (m.id || idx) && (
+                            <span className="speaker-mini-equalizer">
+                              <span></span><span></span><span></span>
+                            </span>
+                          )}
                         </button>
                       )}
 
@@ -885,15 +890,15 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
               )}
             </div>
 
-            {/* Colorful Microphone Voice Input Button */}
+            {/* 3D Emoji / Logo Style Microphone Voice Input Button */}
             <button 
               type="button"
-              className={`btn ai-mic-btn ${isListening ? 'listening-active' : ''}`}
+              className={`btn ai-mic-btn-emoji ${isListening ? 'listening-active' : ''}`}
               onClick={toggleVoiceRecognition}
               title={isListening ? "Stop voice listening" : `Voice Input (${activeLangObj.label}) - Click to speak!`}
             >
-              {isListening ? <MicOff size={20} className="mic-icon-svg" /> : <Mic size={20} className="mic-icon-svg" />}
-              <span className="mic-voice-tag">{isListening ? 'REC' : 'VOICE'}</span>
+              <span className="mic-emoji-logo">{isListening ? '🛑' : '🎙️'}</span>
+              <span className="mic-voice-tag">{isListening ? 'LIVE' : 'MIC'}</span>
             </button>
 
             {/* Send Button */}
