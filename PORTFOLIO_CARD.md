@@ -66,7 +66,7 @@ Use these ready-to-copy cards, snippets, and badges to showcase **Grand Aurelia*
       <a href="https://github.com/rokeyaag/grand-aurelia" target="_blank" style="flex: 1; text-align: center; background: #1F3A5F; color: #ffffff; padding: 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
         GitHub Repo
       </a>
-      <a href="https://github.com/rokeyaag/grand-aurelia" target="_blank" style="flex: 1; text-align: center; background: #FF2147; color: #ffffff; padding: 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+      <a href="https://grand-aurelia-five.vercel.app/" target="_blank" style="flex: 1; text-align: center; background: #FF2147; color: #ffffff; padding: 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
         Live Demo
       </a>
     </div>

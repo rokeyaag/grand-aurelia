@@ -27,9 +27,10 @@ npm start
 npm run dev
 ```
 
-- **Frontend Application**: `http://localhost:3000`
-- **Backend REST API**: `http://localhost:5000`
-- **API Health Check**: `http://localhost:5000/api/health`
+- **Live Production URL**: [https://grand-aurelia-five.vercel.app/](https://grand-aurelia-five.vercel.app/)
+- **Frontend Application (Local)**: `http://localhost:3000`
+- **Backend REST API (Local)**: `http://localhost:5000`
+- **API Health Check**: `https://grand-aurelia-five.vercel.app/api/health`
 
 ---
 
