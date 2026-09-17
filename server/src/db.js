@@ -1,0 +1,575 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_FILE = path.join(__dirname, '../data/database.json');
+
+// Default initial seed data for IHG Enterprise Platform
+const initialData = {
+  users: [
+    {
+      id: 'usr_admin',
+      name: 'Rahman Khan (GM)',
+      email: 'gm@ihg-hospitality.com',
+      role: 'ADMIN_GM',
+      phone: '+880 1711 000001',
+      avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150'
+    },
+    {
+      id: 'usr_frontdesk',
+      name: 'Nusrat Jahan',
+      email: 'frontdesk@ihg-hospitality.com',
+      role: 'FRONT_DESK',
+      phone: '+880 1711 000002',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'
+    },
+    {
+      id: 'usr_chef',
+      name: 'Chef Antonio Rossi',
+      email: 'kitchen@ihg-hospitality.com',
+      role: 'KITCHEN_CHEF',
+      phone: '+880 1711 000003',
+      avatar: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150'
+    },
+    {
+      id: 'usr_housekeeping',
+      name: 'Farhana Akter',
+      email: 'housekeeping@ihg-hospitality.com',
+      role: 'HOUSEKEEPING',
+      phone: '+880 1711 000004',
+      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150'
+    },
+    {
+      id: 'usr_waiter',
+      name: 'Tanvir Hossain',
+      email: 'waiter@ihg-hospitality.com',
+      role: 'WAITER',
+      phone: '+880 1711 000005',
+      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150'
+    },
+    {
+      id: 'usr_rider',
+      name: 'Kamrul Hasan (Rider #1)',
+      email: 'rider@ihg-hospitality.com',
+      role: 'DELIVERY_RIDER',
+      phone: '+880 1711 000006',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
+    },
+    {
+      id: 'usr_guest',
+      name: 'Dr. Sarah Mahmud',
+      email: 'sarah.m@gmail.com',
+      role: 'GUEST_CUSTOMER',
+      phone: '+880 1819 123456',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
+    }
+  ],
+  rooms: [
+    {
+      id: 'rm_101',
+      number: '101',
+      type: 'Deluxe Ocean Suite',
+      tier: 'Luxury Suite',
+      floor: 1,
+      pricePerNight: 180,
+      capacity: 2,
+      bedType: '1 King Bed',
+      size: '48 m²',
+      status: 'Occupied',
+      amenities: ['Ocean View', 'Balcony', 'King Bed', 'Free High-Speed Wi-Fi', 'Smart TV 55"', 'Mini Bar', 'Bathtub', 'Espresso Machine'],
+      image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600',
+      currentGuest: 'Dr. Sarah Mahmud',
+      cleaningStatus: 'Clean'
+    },
+    {
+      id: 'rm_102',
+      number: '102',
+      type: 'Executive Business Suite',
+      tier: 'Business Suite',
+      floor: 1,
+      pricePerNight: 220,
+      capacity: 3,
+      bedType: '1 King + 1 Sofa Bed',
+      size: '56 m²',
+      status: 'Available',
+      amenities: ['Workstation Desk', 'Ergonomic Chair', 'High-Speed Wi-Fi', 'Living Area', 'Mini Bar', 'City View', 'Rain Shower'],
+      image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=600',
+      currentGuest: null,
+      cleaningStatus: 'Clean'
+    },
+    {
+      id: 'rm_201',
+      number: '201',
+      type: 'Presidential Penthouse',
+      tier: 'Presidential',
+      floor: 2,
+      pricePerNight: 450,
+      capacity: 4,
+      bedType: '2 King Beds',
+      size: '110 m²',
+      status: 'Available',
+      amenities: ['Panoramic View', 'Private Jacuzzi', 'Dining Area', 'Butler Service', 'Walk-in Closet', 'Wine Cooler', 'Smart Automation'],
+      image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600',
+      currentGuest: null,
+      cleaningStatus: 'Clean'
+    },
+    {
+      id: 'rm_202',
+      number: '202',
+      type: 'Grand Premium Room',
+      tier: 'Premium',
+      floor: 2,
+      pricePerNight: 140,
+      capacity: 2,
+      bedType: '1 Queen Bed',
+      size: '38 m²',
+      status: 'Cleaning',
+      amenities: ['City Skyline View', 'Work Desk', 'Wi-Fi 6', 'Rain Shower', 'Coffee Maker', 'Safe Box'],
+      image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=600',
+      currentGuest: null,
+      cleaningStatus: 'Cleaning In-Progress'
+    },
+    {
+      id: 'rm_301',
+      number: '301',
+      type: 'Deluxe Twin Garden Room',
+      tier: 'Deluxe',
+      floor: 3,
+      pricePerNight: 120,
+      capacity: 2,
+      bedType: '2 Twin Beds',
+      size: '35 m²',
+      status: 'Available',
+      amenities: ['Garden View', 'Wi-Fi', '43" LED TV', 'Mini Fridge', 'Tea/Coffee Station'],
+      image: 'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=600',
+      currentGuest: null,
+      cleaningStatus: 'Clean'
+    },
+    {
+      id: 'rm_302',
+      number: '302',
+      type: 'Cozy Boutique Studio',
+      tier: 'Standard',
+      floor: 3,
+      pricePerNight: 95,
+      capacity: 2,
+      bedType: '1 Queen Bed',
+      size: '30 m²',
+      status: 'Maintenance',
+      amenities: ['Wi-Fi', 'Smart TV', 'Ensuite Bathroom', 'Air Conditioning'],
+      image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600',
+      currentGuest: null,
+      cleaningStatus: 'Maintenance Required'
+    }
+  ],
+  bookings: [
+    {
+      id: 'bk_1001',
+      bookingNumber: 'IHG-BK-2026-8801',
+      roomId: 'rm_101',
+      roomNumber: '101',
+      guestName: 'Dr. Sarah Mahmud',
+      guestEmail: 'sarah.m@gmail.com',
+      guestPhone: '+880 1819 123456',
+      checkInDate: '2026-09-16',
+      checkOutDate: '2026-09-20',
+      nights: 4,
+      totalGuests: 2,
+      pricePerNight: 180,
+      totalAmount: 720,
+      paidAmount: 720,
+      paymentStatus: 'Paid',
+      paymentMethod: 'Credit Card (Visa)',
+      status: 'Checked-In',
+      specialRequests: 'Late checkout if available, extra feather pillows.',
+      createdAt: '2026-09-15T10:30:00Z'
+    },
+    {
+      id: 'bk_1002',
+      bookingNumber: 'IHG-BK-2026-8802',
+      roomId: 'rm_102',
+      roomNumber: '102',
+      guestName: 'Mr. Tariq Al-Mansoor',
+      guestEmail: 'tariq.mansoor@techcorp.com',
+      guestPhone: '+880 1712 998877',
+      checkInDate: '2026-09-18',
+      checkOutDate: '2026-09-22',
+      nights: 4,
+      totalGuests: 1,
+      pricePerNight: 220,
+      totalAmount: 880,
+      paidAmount: 880,
+      paymentStatus: 'Paid',
+      paymentMethod: 'MasterCard',
+      status: 'Confirmed',
+      specialRequests: 'High-speed LAN cable required in workspace.',
+      createdAt: '2026-09-16T14:15:00Z'
+    }
+  ],
+  housekeepingTasks: [
+    {
+      id: 'hk_01',
+      roomId: 'rm_202',
+      roomNumber: '202',
+      taskType: 'Post Checkout Deep Clean',
+      assignedTo: 'Farhana Akter',
+      priority: 'High',
+      status: 'In-Progress',
+      notes: 'Sanitize linen, restock mini-bar and premium toiletries.',
+      scheduledAt: '2026-09-17T08:00:00Z',
+      completedAt: null
+    },
+    {
+      id: 'hk_02',
+      roomId: 'rm_101',
+      roomNumber: '101',
+      taskType: 'Daily Turndown & Towel Refresh',
+      assignedTo: 'Farhana Akter',
+      priority: 'Medium',
+      status: 'Pending',
+      notes: 'Guest requested morning cleaning at 10:30 AM.',
+      scheduledAt: '2026-09-17T10:30:00Z',
+      completedAt: null
+    },
+    {
+      id: 'hk_03',
+      roomId: 'rm_302',
+      roomNumber: '302',
+      taskType: 'AC Filter Inspection & Maintenance',
+      assignedTo: 'Maintenance Team',
+      priority: 'High',
+      status: 'Pending',
+      notes: 'Thermostat sensor calibration in progress.',
+      scheduledAt: '2026-09-17T09:00:00Z',
+      completedAt: null
+    }
+  ],
+  inRoomServices: [
+    {
+      id: 'irs_01',
+      roomNumber: '101',
+      guestName: 'Dr. Sarah Mahmud',
+      serviceType: 'In-Room Dining',
+      details: '1x Grilled Atlantic Salmon, 1x Fresh Orange Juice, Extra Cutlery',
+      status: 'In-Progress',
+      amount: 32.50,
+      requestedAt: '2026-09-17T06:40:00Z'
+    },
+    {
+      id: 'irs_02',
+      roomNumber: '101',
+      guestName: 'Dr. Sarah Mahmud',
+      serviceType: 'Housekeeping Amenities',
+      details: '2x Extra Bath Towels & Dental Kit',
+      status: 'Completed',
+      amount: 0,
+      requestedAt: '2026-09-16T20:15:00Z'
+    }
+  ],
+  tables: [
+    { id: 'tbl_1', number: 'T-01', capacity: 2, section: 'Terrace Garden', status: 'Available', currentOrderId: null },
+    { id: 'tbl_2', number: 'T-02', capacity: 4, section: 'Terrace Garden', status: 'Reserved', currentOrderId: null },
+    { id: 'tbl_3', number: 'T-03', capacity: 4, section: 'Main Fine Dining', status: 'Occupied', currentOrderId: 'ord_dine_01' },
+    { id: 'tbl_4', number: 'T-04', capacity: 6, section: 'Main Fine Dining', status: 'Available', currentOrderId: null },
+    { id: 'tbl_5', number: 'T-05', capacity: 8, section: 'VIP Royal Lounge', status: 'Available', currentOrderId: null },
+    { id: 'tbl_6', number: 'T-06', capacity: 2, section: 'Main Fine Dining', status: 'Available', currentOrderId: null }
+  ],
+  tableReservations: [
+    {
+      id: 'res_01',
+      reservationNumber: 'IHG-TB-901',
+      customerName: 'Ashfaqur Rahman',
+      phone: '+880 1722 334455',
+      guestsCount: 4,
+      tableNumber: 'T-02',
+      section: 'Terrace Garden',
+      date: '2026-09-17',
+      timeSlot: '19:30',
+      status: 'Confirmed',
+      specialRequests: 'Candlelight setup for wedding anniversary celebration.'
+    }
+  ],
+  menuItems: [
+    {
+      id: 'm_01',
+      name: 'Prime Wagyu Ribeye Steak',
+      category: 'Main Course',
+      price: 42.00,
+      rating: 4.9,
+      calories: 780,
+      prepTime: '20 mins',
+      isVeg: false,
+      isChefSpecial: true,
+      description: 'Char-grilled Grade A5 Wagyu ribeye with truffle herb butter, roasted asparagus and garlic mash.',
+      image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600'
+    },
+    {
+      id: 'm_02',
+      name: 'Grilled Atlantic Salmon Fillet',
+      category: 'Main Course',
+      price: 28.50,
+      rating: 4.8,
+      calories: 520,
+      prepTime: '15 mins',
+      isVeg: false,
+      isChefSpecial: true,
+      description: 'Pan-seared wild Atlantic salmon, citrus beurre blanc, wild rice pilaf & charred broccolini.',
+      image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600'
+    },
+    {
+      id: 'm_03',
+      name: 'Truffle & Wild Mushroom Risotto',
+      category: 'Main Course',
+      price: 22.00,
+      rating: 4.7,
+      calories: 460,
+      prepTime: '18 mins',
+      isVeg: true,
+      isChefSpecial: false,
+      description: 'Creamy Arborio rice with porcini mushrooms, white truffle oil, shaved aged Parmigiano Reggiano.',
+      image: 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=600'
+    },
+    {
+      id: 'm_04',
+      name: 'Artisan Burrata Caprese Salad',
+      category: 'Appetizers',
+      price: 15.50,
+      rating: 4.9,
+      calories: 340,
+      prepTime: '8 mins',
+      isVeg: true,
+      isChefSpecial: false,
+      description: 'Fresh Italian burrata cheese, heirloom cherry tomatoes, basil pesto glaze, toasted pine nuts & focaccia.',
+      image: 'https://images.unsplash.com/photo-1592417817098-8f3d6910985b?w=600'
+    },
+    {
+      id: 'm_05',
+      name: 'Crispy Calamari Fritti',
+      category: 'Appetizers',
+      price: 14.00,
+      rating: 4.6,
+      calories: 380,
+      prepTime: '10 mins',
+      isVeg: false,
+      isChefSpecial: false,
+      description: 'Golden spiced calamari rings served with lemon garlic aioli and fresh marinara dip.',
+      image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=600'
+    },
+    {
+      id: 'm_06',
+      name: 'IHG Signature Gourmet Burger',
+      category: 'Main Course',
+      price: 19.50,
+      rating: 4.8,
+      calories: 820,
+      prepTime: '14 mins',
+      isVeg: false,
+      isChefSpecial: false,
+      description: 'Angus beef patty, smoked cheddar, caramelized onion relish, brioche bun, served with truffle fries.',
+      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600'
+    },
+    {
+      id: 'm_07',
+      name: 'Molten Belgian Chocolate Lava Cake',
+      category: 'Desserts',
+      price: 11.50,
+      rating: 5.0,
+      calories: 490,
+      prepTime: '12 mins',
+      isVeg: true,
+      isChefSpecial: true,
+      description: 'Warm dark chocolate ganache center, Madagascar vanilla bean gelato, raspberry coulis.',
+      image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600'
+    },
+    {
+      id: 'm_08',
+      name: 'Classic Italian Tiramisu',
+      category: 'Desserts',
+      price: 10.00,
+      rating: 4.7,
+      calories: 390,
+      prepTime: '5 mins',
+      isVeg: true,
+      isChefSpecial: false,
+      description: 'Espresso-soaked savoiardi ladyfingers, velvety mascarpone cream, dusted with cocoa.',
+      image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600'
+    },
+    {
+      id: 'm_09',
+      name: 'Berry Hibiscus Mocktail',
+      category: 'Beverages',
+      price: 7.50,
+      rating: 4.8,
+      calories: 120,
+      prepTime: '4 mins',
+      isVeg: true,
+      isChefSpecial: false,
+      description: 'Brewed wild hibiscus, fresh crushed blackberries, mint leaves, sparkling elderflower tonic.',
+      image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600'
+    },
+    {
+      id: 'm_10',
+      name: 'Single Origin Espresso & Latte',
+      category: 'Beverages',
+      price: 5.50,
+      rating: 4.9,
+      calories: 90,
+      prepTime: '3 mins',
+      isVeg: true,
+      isChefSpecial: false,
+      description: 'Artisan roasted Ethiopian Arabica beans with velvety micro-foam milk.',
+      image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600'
+    }
+  ],
+  orders: [
+    {
+      id: 'ord_dine_01',
+      orderNumber: 'IHG-ORD-7001',
+      orderType: 'DINE_IN',
+      tableNumber: 'T-03',
+      waiterName: 'Tanvir Hossain',
+      customerName: 'Table 03 Guests',
+      customerPhone: '',
+      items: [
+        { menuItemId: 'm_01', name: 'Prime Wagyu Ribeye Steak', quantity: 2, price: 42.00, notes: 'Medium Rare' },
+        { menuItemId: 'm_04', name: 'Artisan Burrata Caprese Salad', quantity: 1, price: 15.50, notes: 'Dressing on side' },
+        { menuItemId: 'm_09', name: 'Berry Hibiscus Mocktail', quantity: 2, price: 7.50, notes: 'Less ice' }
+      ],
+      subtotal: 114.50,
+      tax: 11.45,
+      deliveryFee: 0,
+      discount: 0,
+      total: 125.95,
+      paymentMethod: 'Pending (At Table)',
+      paymentStatus: 'Pending',
+      status: 'PREPARING',
+      kdsStatus: 'PREPARING',
+      createdAt: '2026-09-17T06:35:00Z'
+    },
+    {
+      id: 'ord_deliv_01',
+      orderNumber: 'IHG-ORD-7002',
+      orderType: 'DELIVERY',
+      customerName: 'Nazmul Abedin',
+      customerPhone: '+880 1713 554433',
+      deliveryAddress: 'House 42, Road 11, Block D, Banani, Dhaka',
+      deliveryNotes: 'Ring bell twice, leave with security if unreachable.',
+      items: [
+        { menuItemId: 'm_06', name: 'IHG Signature Gourmet Burger', quantity: 2, price: 19.50, notes: 'Extra crispy fries' },
+        { menuItemId: 'm_05', name: 'Crispy Calamari Fritti', quantity: 1, price: 14.00, notes: 'Extra aioli' },
+        { menuItemId: 'm_07', name: 'Molten Belgian Chocolate Lava Cake', quantity: 1, price: 11.50, notes: '' }
+      ],
+      subtotal: 64.50,
+      tax: 6.45,
+      deliveryFee: 4.50,
+      discount: 5.00,
+      total: 70.45,
+      paymentMethod: 'bKash Online Payment',
+      paymentStatus: 'Paid',
+      status: 'OUT_FOR_DELIVERY',
+      assignedRider: {
+        id: 'usr_rider',
+        name: 'Kamrul Hasan',
+        phone: '+880 1711 000006',
+        vehicle: 'Honda CG 125 (Reg: DHK-HA-4412)'
+      },
+      estimatedMinutes: 18,
+      createdAt: '2026-09-17T06:20:00Z',
+      timeline: [
+        { status: 'ORDER_PLACED', time: '06:20 AM', text: 'Order placed & payment verified' },
+        { status: 'PREPARING', time: '06:25 AM', text: 'Kitchen started cooking' },
+        { status: 'OUT_FOR_DELIVERY', time: '06:42 AM', text: 'Rider picked up order and heading to your location' }
+      ]
+    },
+    {
+      id: 'ord_deliv_02',
+      orderNumber: 'IHG-ORD-7003',
+      orderType: 'DELIVERY',
+      customerName: 'Anika Tabassum',
+      customerPhone: '+880 1818 998811',
+      deliveryAddress: 'Apartment 7B, Gulshan Lakeview Residence, Road 49, Gulshan-2',
+      deliveryNotes: 'Call upon arrival.',
+      items: [
+        { menuItemId: 'm_02', name: 'Grilled Atlantic Salmon Fillet', quantity: 1, price: 28.50, notes: '' },
+        { menuItemId: 'm_03', name: 'Truffle & Wild Mushroom Risotto', quantity: 1, price: 22.00, notes: '' },
+        { menuItemId: 'm_08', name: 'Classic Italian Tiramisu', quantity: 2, price: 10.00, notes: '' }
+      ],
+      subtotal: 70.50,
+      tax: 7.05,
+      deliveryFee: 4.50,
+      discount: 0,
+      total: 82.05,
+      paymentMethod: 'Credit Card',
+      paymentStatus: 'Paid',
+      status: 'PREPARING',
+      assignedRider: null,
+      estimatedMinutes: 30,
+      createdAt: '2026-09-17T06:42:00Z',
+      timeline: [
+        { status: 'ORDER_PLACED', time: '06:42 AM', text: 'Order confirmed' },
+        { status: 'PREPARING', time: '06:45 AM', text: 'Kitchen is preparing gourmet dishes' }
+      ]
+    }
+  ],
+  inventory: [
+    { id: 'inv_01', name: 'A5 Wagyu Beef Cuts', category: 'Kitchen Ingredients', currentStock: 18.5, minThreshold: 10.0, unit: 'kg', unitCost: 45.00, supplier: 'Tokyo Gourmet Imports', status: 'Optimal' },
+    { id: 'inv_02', name: 'Fresh Atlantic Salmon', category: 'Kitchen Ingredients', currentStock: 14.0, minThreshold: 8.0, unit: 'kg', unitCost: 22.00, supplier: 'Nordic Sea Foods', status: 'Optimal' },
+    { id: 'inv_03', name: 'Italian Truffle Oil (500ml)', category: 'Kitchen Ingredients', currentStock: 4, minThreshold: 5, unit: 'bottles', unitCost: 35.00, supplier: 'Tuscany Exports', status: 'Low Stock' },
+    { id: 'inv_04', name: 'Arborio Risotto Rice', category: 'Kitchen Ingredients', currentStock: 35.0, minThreshold: 15.0, unit: 'kg', unitCost: 4.50, supplier: 'Euro Fine Foods', status: 'Optimal' },
+    { id: 'inv_05', name: 'Artisan Burrata Cheese', category: 'Kitchen Ingredients', currentStock: 6, minThreshold: 10, unit: 'packs (4x)', unitCost: 18.00, supplier: 'Lombardy Dairy', status: 'Low Stock' },
+    { id: 'inv_06', name: 'Ethiopian Single Origin Coffee', category: 'Beverages', currentStock: 22.0, minThreshold: 10.0, unit: 'kg', unitCost: 19.50, supplier: 'Addis Roasters', status: 'Optimal' },
+    { id: 'inv_07', name: 'Luxury Cotton Towel Sets', category: 'Hotel Amenities', currentStock: 140, minThreshold: 50, unit: 'sets', unitCost: 16.00, supplier: 'Royal Textile Ltd', status: 'Optimal' },
+    { id: 'inv_08', name: 'Organic Herbal Toiletries Kits', category: 'Hotel Amenities', currentStock: 85, minThreshold: 100, unit: 'kits', unitCost: 3.20, supplier: 'Pure Botanicals Co.', status: 'Low Stock' },
+    { id: 'inv_09', name: 'Eco-Friendly Key Cards', category: 'Front Desk Supplies', currentStock: 420, minThreshold: 150, unit: 'cards', unitCost: 0.80, supplier: 'SmartAccess RFID', status: 'Optimal' },
+    { id: 'inv_10', name: 'Biodegradable Takeaway Boxes', category: 'Delivery Packaging', currentStock: 350, minThreshold: 200, unit: 'pcs', unitCost: 0.45, supplier: 'EcoPack Solutions', status: 'Optimal' }
+  ],
+  invoices: [
+    {
+      id: 'inv_9001',
+      invoiceNumber: 'INV-2026-0091',
+      guestName: 'Dr. Sarah Mahmud',
+      roomNumber: '101',
+      roomTotal: 720.00,
+      diningTotal: 32.50,
+      tax: 75.25,
+      discount: 0,
+      netTotal: 827.75,
+      paidAmount: 720.00,
+      balanceDue: 107.75,
+      status: 'Partial',
+      date: '2026-09-17'
+    }
+  ]
+};
+
+// Ensure data directory and database file exist
+function initDB() {
+  const dataDir = path.dirname(DATA_FILE);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+  }
+}
+
+// Read database
+export function getDB() {
+  initDB();
+  try {
+    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('Error reading DB, resetting to initialData:', err);
+    saveDB(initialData);
+    return initialData;
+  }
+}
+
+// Write database
+export function saveDB(data) {
+  initDB();
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}
