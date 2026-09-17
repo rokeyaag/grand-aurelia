@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, FileDown } from 'lucide-react';
 import robotAvatar from './assets/ai_robot_avatar.jpg';
 import Header, { ROLES } from './components/Header';
 import GMDashboard from './components/GMDashboard';
@@ -679,6 +679,17 @@ export default function App() {
             <span>Developer: <strong className="dev-name">Lutfor Rahman</strong></span>
             <span className="footer-dot">•</span>
             <span>Company: <strong className="dev-company">Lutfor IT Solution</strong></span>
+            <span className="footer-dot">•</span>
+            <a 
+              href="/Grand_Aurelia_Full_Project_Documentation.pdf" 
+              download="Grand_Aurelia_Full_Project_Documentation.pdf" 
+              className="footer-pdf-btn"
+              title="Download Full Project Summary PDF"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FileDown size={13} /> Download Project PDF
+            </a>
             <span className="footer-dot">•</span>
             <span className="footer-system-status"><span className="pulse-indicator"></span> Live System</span>
           </div>

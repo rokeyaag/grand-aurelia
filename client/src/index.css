@@ -565,6 +565,29 @@ input, select, textarea {
   user-select: none;
 }
 
+.footer-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  padding: 0.18rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer-pdf-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(255, 33, 71, 0.35);
+  transform: translateY(-1px);
+}
+
 .footer-system-status {
   display: inline-flex;
   align-items: center;

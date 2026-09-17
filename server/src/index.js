@@ -38,6 +38,28 @@ app.get('/api/health', (req, res) => {
 });
 
 // ----------------------------------------------------
+// PDF DOCUMENTATION DOWNLOAD
+// ----------------------------------------------------
+app.get('/api/download-pdf', (req, res) => {
+  const possiblePaths = [
+    path.resolve(__dirname, '../../Grand_Aurelia_Full_Project_Documentation.pdf'),
+    path.resolve(__dirname, '../Grand_Aurelia_Full_Project_Documentation.pdf'),
+    path.resolve(process.cwd(), 'Grand_Aurelia_Full_Project_Documentation.pdf'),
+    path.resolve(process.cwd(), 'client/public/Grand_Aurelia_Full_Project_Documentation.pdf')
+  ];
+  
+  const foundPath = possiblePaths.find(p => fs.existsSync(p));
+  
+  if (foundPath) {
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Grand_Aurelia_Full_Project_Documentation.pdf"');
+    fs.createReadStream(foundPath).pipe(res);
+  } else {
+    res.status(404).json({ error: 'PDF documentation not found' });
+  }
+});
+
+// ----------------------------------------------------
 // AUTH & USERS
 // ----------------------------------------------------
 app.get('/api/users', (req, res) => {
