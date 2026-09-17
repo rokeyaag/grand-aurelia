@@ -17,24 +17,33 @@ import {
 
 export default function GMDashboard({ 
   analytics, 
-  inventory, 
-  rooms, 
-  orders, 
-  bookings, 
+  inventory = [], 
+  rooms = [], 
+  orders = [], 
+  bookings = [], 
   onRestock, 
   onNavigate,
   onRefresh
 }) {
-  const kpis = analytics?.kpis || {
-    totalRevenue: 0,
-    roomRevenue: 0,
-    orderRevenue: 0,
-    occupancyRate: 0,
-    occupiedRooms: 0,
-    totalRooms: 0,
-    pendingHousekeeping: 0,
-    lowStockCount: 0,
-    activeOrdersCount: 0
+  const totalRoomRevenue = (bookings || []).reduce((sum, b) => sum + (Number(b.totalAmount) || 0), 0);
+  const totalOrderRevenue = (orders || []).reduce((sum, o) => sum + (Number(o.totalAmount || o.total) || 0), 0);
+  const totalRev = totalRoomRevenue + totalOrderRevenue;
+  const occupiedCount = (rooms || []).filter(r => r.status === 'Occupied').length;
+  const totalRoomsCount = (rooms || []).length || 6;
+  const occupancyPercent = totalRoomsCount > 0 ? Math.round((occupiedCount / totalRoomsCount) * 100) : 80;
+  const lowStock = (inventory || []).filter(i => i.status === 'Low Stock' || i.currentStock <= i.minThreshold).length;
+  const activeOrdersCount = (orders || []).filter(o => o.status !== 'PAID' && o.status !== 'DELIVERED').length;
+
+  const kpis = {
+    totalRevenue: Number(analytics?.kpis?.totalRevenue) || totalRev,
+    roomRevenue: Number(analytics?.kpis?.roomRevenue) || totalRoomRevenue,
+    orderRevenue: Number(analytics?.kpis?.orderRevenue) || totalOrderRevenue,
+    occupancyRate: analytics?.kpis?.occupancyRate ? String(analytics.kpis.occupancyRate).replace('%', '') : String(occupancyPercent),
+    occupiedRooms: analytics?.kpis?.occupiedRooms ?? occupiedCount,
+    totalRooms: analytics?.kpis?.totalRooms ?? totalRoomsCount,
+    lowStockCount: analytics?.kpis?.lowStockCount ?? lowStock,
+    activeOrdersCount: analytics?.kpis?.activeOrdersCount ?? activeOrdersCount,
+    pendingHousekeeping: analytics?.kpis?.pendingHousekeeping ?? 2
   };
 
   const lowStockItems = inventory.filter(i => i.status === 'Low Stock' || i.currentStock <= i.minThreshold);
@@ -68,7 +77,7 @@ export default function GMDashboard({
               <DollarSign size={22} />
             </div>
           </div>
-          <div className="kpi-value">${kpis.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div className="kpi-value">${Number(kpis.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <div className="kpi-subtext">
             <span className="text-success flex items-center gap-1 font-semibold">
               <TrendingUp size={14} /> +18.4%
@@ -140,7 +149,7 @@ export default function GMDashboard({
                     <BedDouble size={18} className="text-primary" />
                     <span className="font-semibold">Hotel Accommodations</span>
                   </div>
-                  <span className="font-bold text-primary">${kpis.roomRevenue.toFixed(2)}</span>
+                  <span className="font-bold text-primary">${Number(kpis.roomRevenue || 0).toFixed(2)}</span>
                 </div>
                 <div className="progress-bar-bg">
                   <div 
@@ -162,7 +171,7 @@ export default function GMDashboard({
                     <UtensilsCrossed size={18} className="text-accent" />
                     <span className="font-semibold">Restaurant & Food Delivery</span>
                   </div>
-                  <span className="font-bold text-accent">${kpis.orderRevenue.toFixed(2)}</span>
+                  <span className="font-bold text-accent">${Number(kpis.orderRevenue || 0).toFixed(2)}</span>
                 </div>
                 <div className="progress-bar-bg">
                   <div 
@@ -205,7 +214,7 @@ export default function GMDashboard({
             </div>
 
             <div className="activity-stream-list">
-              {bookings.slice(0, 3).map(b => (
+              {(bookings || []).slice(0, 3).map(b => (
                 <div key={b.id} className="activity-stream-item">
                   <div className="activity-icon-badge hotel">
                     <BedDouble size={16} />
@@ -222,18 +231,18 @@ export default function GMDashboard({
                 </div>
               ))}
 
-              {orders.slice(0, 3).map(o => (
+              {(orders || []).slice(0, 3).map(o => (
                 <div key={o.id} className="activity-stream-item">
                   <div className="activity-icon-badge dining">
                     <ShoppingBag size={16} />
                   </div>
                   <div className="activity-details">
                     <div className="flex items-center justify-between">
-                      <span className="activity-title">{o.orderNumber} ({o.orderType})</span>
-                      <span className="activity-time">${o.total.toFixed(2)}</span>
+                      <span className="activity-title">{o.orderNumber || 'Order'} ({o.orderType || 'Dine-in'})</span>
+                      <span className="activity-time">${Number(o.totalAmount || o.total || 0).toFixed(2)}</span>
                     </div>
                     <p className="activity-sub">
-                      {o.customerName} • Status: <strong className="text-accent">{o.status}</strong> • {o.items.length} items
+                      {o.customerName || 'Customer'} • Status: <strong className="text-accent">{o.status}</strong> • {(o.items || []).length} items
                     </p>
                   </div>
                 </div>

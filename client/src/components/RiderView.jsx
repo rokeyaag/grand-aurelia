@@ -93,7 +93,7 @@ export default function RiderView({ orders, onCompleteDelivery }) {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-muted">Amount Collectable:</span>
                   <strong className="text-accent text-base">
-                    {order.paymentStatus === 'Paid' ? 'PAID ONLINE' : `$${order.total.toFixed(2)} CASH`}
+                    {order.paymentStatus === 'Paid' ? 'PAID ONLINE' : `$${Number(order.totalAmount || order.total || 0).toFixed(2)} CASH`}
                   </strong>
                 </div>
 
@@ -131,7 +131,7 @@ export default function RiderView({ orders, onCompleteDelivery }) {
                     <td><strong>{o.orderNumber}</strong></td>
                     <td>{o.customerName}</td>
                     <td className="text-xs">{o.deliveryAddress}</td>
-                    <td><strong>${o.total.toFixed(2)}</strong></td>
+                    <td><strong>${Number(o.totalAmount || o.total || 0).toFixed(2)}</strong></td>
                     <td><span className="badge badge-success">{o.paymentStatus}</span></td>
                     <td><span className="badge badge-success">✓ DELIVERED</span></td>
                   </tr>
