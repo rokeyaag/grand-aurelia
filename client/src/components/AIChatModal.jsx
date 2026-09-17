@@ -42,7 +42,7 @@ import {
   Radio,
   Trash2
 } from 'lucide-react';
-import { CLIENT_KNOWLEDGE_TOPICS, FREQUENT_QUESTIONS, FLIGHT_SCHEDULES, queryClientKnowledge, detectLanguage } from '../projectKnowledge';
+import { CLIENT_KNOWLEDGE_TOPICS, FREQUENT_QUESTIONS, FLIGHT_SCHEDULES, queryClientKnowledge } from '../projectKnowledge';
 
 const SUPPORTED_LANGUAGES = [
   { code: 'bn-BD', langCode: 'bn', label: 'বাংলা (Bengali)', flag: '🇧🇩', short: 'বাংলা' },
@@ -69,7 +69,7 @@ export default function AIChatModal({
       sender: 'bot',
       text: `👋 **Welcome to Grand Aurelia AI ChatBoot & Global Travel Concierge!**
 
-I am your 24/7 multilingual intelligent concierge (বাংলা, English, Deutsch, العربية, Français, Español):
+I am your 24/7 intelligent concierge & knowledge engine for this entire luxury ecosystem:
 • ✈️ **Airlines & Flight Ticket Booking** (Emirates Dubai, Singapore Airlines, Qatar Airways Qsuite, Domestic & Private Jets)
 • 🏨 **Luxury Suites & Pricing** (Ocean Suites, Business Suites, Presidential Penthouse)
 • 🚗 **Chauffeur & Yacht Charter** (Rolls-Royce Phantom, Maybach, 65ft Azure Private Yacht)
@@ -78,7 +78,7 @@ I am your 24/7 multilingual intelligent concierge (বাংলা, English, Deu
 • 🪑 **Table Reservations & POS** (Indoor Grand Hall, Terrace Garden, VIP Lounge)
 • 💳 **Invoices, Billing & Payments** (10% VAT folios, bKash, Nagad & Cards)
 
-🎙️ *You can speak via Microphone or type in any language!*`,
+🎙️ *You can speak via Microphone in any language (Bengali, English, German, Arabic, French, Spanish) and all responses will be provided in clear English!*`,
       recommendations: [
         { 
           id: 'fl_01',
@@ -229,16 +229,8 @@ I am your 24/7 multilingual intelligent concierge (বাংলা, English, Deu
       .replace(/👋|✈️|🏨|🚗|💆|🍽️|🪑|💳|★|•|💵/g, '')
       .trim();
 
-    const detectedLang = detectLanguage(cleanText);
-    let voiceLocale = 'en-US';
-    if (detectedLang === 'bn') voiceLocale = 'bn-BD';
-    else if (detectedLang === 'de') voiceLocale = 'de-DE';
-    else if (detectedLang === 'ar') voiceLocale = 'ar-SA';
-    else if (detectedLang === 'fr') voiceLocale = 'fr-FR';
-    else if (detectedLang === 'es') voiceLocale = 'es-ES';
-
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = voiceLocale;
+    utterance.lang = 'en-US';
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
@@ -257,19 +249,16 @@ I am your 24/7 multilingual intelligent concierge (বাংলা, English, Deu
     window.speechSynthesis.speak(utterance);
   };
 
-  // Filtered prompt chips based on category
+  // Filtered prompt chips based on category (All English)
   const filteredPrompts = FREQUENT_QUESTIONS.filter(q => {
     if (activeCategory === 'all') return true;
-    if (activeCategory === 'flights') return q.query.toLowerCase().includes('flight') || q.query.toLowerCase().includes('dubai') || q.query.includes('flüg');
+    if (activeCategory === 'flights') return q.query.toLowerCase().includes('flight') || q.query.toLowerCase().includes('dubai');
     if (activeCategory === 'chauffeur_yacht') return q.query.toLowerCase().includes('rolls') || q.query.toLowerCase().includes('yacht');
     if (activeCategory === 'spa_wellness') return q.query.toLowerCase().includes('spa');
-    if (activeCategory === 'rooms') return q.query.toLowerCase().includes('suite') || q.query.toLowerCase().includes('room') || q.query.includes('zimmer');
+    if (activeCategory === 'rooms') return q.query.toLowerCase().includes('suite') || q.query.toLowerCase().includes('room');
     if (activeCategory === 'dining_menu') return q.query.toLowerCase().includes('food') || q.query.toLowerCase().includes('chef');
     if (activeCategory === 'tables') return q.query.toLowerCase().includes('table') || q.query.toLowerCase().includes('terrace');
     if (activeCategory === 'invoices_billing') return q.query.toLowerCase().includes('payment') || q.query.toLowerCase().includes('bill');
-    if (activeCategory === 'bn') return q.query.includes('বাংলা') || q.query.includes('বিমান');
-    if (activeCategory === 'de') return q.query.includes('Flüg') || q.query.includes('Deutsch');
-    if (activeCategory === 'ar') return q.query.includes('حجز') || q.query.includes('طيران');
     return true;
   });
 
@@ -566,33 +555,6 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
               >
                 💳 Invoices & Payments
               </button>
-              <button 
-                className={`topic-pill ${activeCategory === 'bn' ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory('bn');
-                  handleSendMessage('গ্র্যান্ড অরেলিয়া প্রজেক্টে বিমান টিকিট বুকিং ও সকল ফিচার সম্পর্কে বিস্তারিত বাংলায় জানাও');
-                }}
-              >
-                🇧🇩 বাংলা গাইড
-              </button>
-              <button 
-                className={`topic-pill ${activeCategory === 'de' ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory('de');
-                  handleSendMessage('Welche Flüge und Luxus-Suiten kann ich im Grand Aurelia buchen?');
-                }}
-              >
-                🇩🇪 Deutsch
-              </button>
-              <button 
-                className={`topic-pill ${activeCategory === 'ar' ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory('ar');
-                  handleSendMessage('كيف يمكنني حجز تذكرة طيران وجناح فاخر في فندق غراند أوريليا؟');
-                }}
-              >
-                🇸🇦 العربية
-              </button>
             </div>
           </div>
 
@@ -846,7 +808,7 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
 
               {showLangDropdown && (
                 <div className="speech-lang-dropdown shadow-lg animate-fade-in">
-                  <div className="dropdown-title">Select Speech / Input Language:</div>
+                  <div className="dropdown-title">Select Mic Voice Language (Sound Input):</div>
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
@@ -872,7 +834,7 @@ How may I assist you with airlines booking, suite reservations, chauffeur fleet,
               <input 
                 ref={inputRef}
                 type="text" 
-                placeholder={`Ask in ${activeLangObj.short}, English, Deutsch, العربية (Flights, Suites, Yacht, Menu)...`} 
+                placeholder="Speak or type in any language (Flights, Suites, Yacht, Menu, Bills)..." 
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 className="form-control with-icon ai-input-wide"

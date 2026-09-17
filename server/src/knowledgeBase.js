@@ -286,7 +286,7 @@ We offer instant airline ticket booking, seat reservation, and private charter s
   }
 ];
 
-// Helper to query knowledge base with live data augmentation
+// Helper to query knowledge base with live data augmentation (100% English responses)
 export function queryKnowledgeBase(query, db = {}) {
   const q = (query || '').toLowerCase().trim();
   const rooms = db.rooms || [];
@@ -295,17 +295,6 @@ export function queryKnowledgeBase(query, db = {}) {
   const orders = db.orders || [];
   const inventory = db.inventory || [];
   const invoices = db.invoices || [];
-
-  let lang = 'en';
-  if (/[\u0980-\u09FF]/.test(q) || q.includes('kemon') || q.includes('koto') || q.includes('ki') || q.includes('hobe') || q.includes('kichu') || q.includes('bolo') || q.includes('janiye') || q.includes('parbo') || q.includes('amake')) {
-    lang = 'bn';
-  } else if (/[\u0600-\u06FF]/.test(q)) {
-    lang = 'ar';
-  } else if (q.includes('flug') || q.includes('flüge') || q.includes('zimmer') || q.includes('speisekarte') || q.includes('essen') || q.includes('buchen') || q.includes('rechnung') || q.includes('hallo') || q.includes('deutsch') || q.includes('preis') || q.includes('wie') || q.includes('bitte') || q.includes('danke')) {
-    lang = 'de';
-  }
-
-  const isBengali = lang === 'bn';
 
   let matchedTopic = null;
   let highestScore = 0;
@@ -322,7 +311,7 @@ export function queryKnowledgeBase(query, db = {}) {
   }
 
   // Check for Flight specific queries
-  if (q.includes('flight') || q.includes('airline') || q.includes('ticket') || q.includes('flug') || q.includes('flüge') || q.includes('طيران') || q.includes('تذكرة') || q.includes('বিমান') || q.includes('ফ্লাইট') || q.includes('টিকেট') || q.includes('dubai') || q.includes('london') || q.includes('singapore')) {
+  if (q.includes('flight') || q.includes('airline') || q.includes('ticket') || q.includes('flug') || q.includes('flüge') || q.includes('vol') || q.includes('billet') || q.includes('vuelo') || q.includes('طيران') || q.includes('تذكرة') || q.includes('বিমান') || q.includes('ফ্লাইট') || q.includes('টিকেট') || q.includes('dubai') || q.includes('london') || q.includes('singapore') || q.includes('bangkok')) {
     const matchingFlights = FLIGHT_SCHEDULES.slice(0, 3);
 
     const flightCards = matchingFlights.map(f => ({
@@ -340,49 +329,21 @@ export function queryKnowledgeBase(query, db = {}) {
       flightData: f
     }));
 
-    let flightReply = '';
-    if (lang === 'bn') {
-      flightReply = `✈️ **গ্র্যান্ড অরেলিয়া ভিআইপি এয়ারলাইন্স টিকিট ও বোর্ডিং পাস সার্ভিস**:
-আমরা বিশ্বের শীর্ষস্থানীয় এয়ারলাইন্সের মাধ্যমে সরাসরি বিমান টিকিট বুকিং সুবিধা প্রদান করি:
-1. **ঢাকা ⇄ দুবাই (Emirates EK-583)**: ইকোনমি **$৩৮০** | বিজনেস **$৮৫০** | ফার্স্ট সুইট **$১,৬৫০**
-2. **ঢাকা ⇄ সিঙ্গাপুর (Singapore SQ-447)**: ইকোনমি **$৩৪০** | বিজনেস **$৭৮০**
-3. **ঢাকা ⇄ লন্ডন (Qatar Airways QR-641 Qsuite)**: ইকোনমি **$৬২০** | বিজনেস **$১,২৫০**
-4. **ঢাকা ⇄ ব্যাংকক (Thai Airways TG-322)**: ইকোনমি **$২৪০** | বিজনেস **$৫২০**
-5. **প্রাইভেট জেট চার্টার (Gulfstream G650ER)**: **$৮,৫০০/ফ্লাইট** (অন-ডিমান্ড ভিআইপি)।
-
-*নিচে প্রদর্শিত টিকেট কার্ড থেকে সরাসরি **"Book Ticket"** বাটনে চাপ দিয়ে ইনস্ট্যান্ট ই-টিকেট ও বোর্ডিং পাস বুক করতে পারেন!*`;
-    } else if (lang === 'de') {
-      flightReply = `✈️ **Grand Aurelia VIP Flugbuchung & Digitale Bordkarten**:
-Wir bieten weltweite Premium-Flugreservierungen mit Partnerfluggesellschaften:
-1. **Dhaka ⇄ Dubai (Emirates EK-583)**: Economy **$380** | Business **$850** | First Suite **$1.650**
-2. **Dhaka ⇄ Singapur (Singapore SQ-447)**: Economy **$340** | Business **$780**
-3. **Dhaka ⇄ London (Qatar Airways QR-641)**: Economy **$620** | Business **$1.250**
-4. **VIP Privatjet (Gulfstream G650ER)**: **$8.500/Flug** (Weltweit inklusive Chauffeur & Privatkoch).
-
-*Klicken Sie unten auf **"Ticket buchen"**, um Ihren Sitzplatz zu sichern!*`;
-    } else if (lang === 'ar') {
-      flightReply = `✈️ **خدمة حجز تذاكر الطيران وبطاقات الصعود - غراند أوريليا**:
-نوفر حجوزات فورية وبطاقات صعود رقمية عبر أفضل خطوط الطيران:
-١. **دكا ⇄ دبي (طيران الإمارات EK-583)**: الدرجة السياحية **٣٨٠$** | درجة الأعمال **٨٥٠$** | الجناح الأول **١,٦٥٠$**
-٢. **دكا ⇄ سنغافورة (الخطوط السنغافورية SQ-447)**: السياحية **٣٤٠$** | الأعمال **٧٨٠$**
-٣. **دكا ⇄ لندن (الخطوط القطرية QR-641)**: السياحية **٦٢٠$** | كيو سويت **١,٢٥٠$**
-٤. **طائرة خاصة VIP (Gulfstream G650ER)**: **٨,٥٠٠$ / رحلة**.`;
-    } else {
-      flightReply = `✈️ **Grand Aurelia VIP Airline & Flight Concierge**:
+    const flightReply = `✈️ **Grand Aurelia VIP Airline & Flight Concierge**:
 We provide instant flight ticket booking and digital boarding passes with top global airlines:
 1. **Dhaka ⇄ Dubai (Emirates EK-583)**: Economy **$380** | Business **$850** | First Suite **$1,650**
 2. **Dhaka ⇄ Singapore (Singapore Airlines SQ-447)**: Economy **$340** | Business **$780**
 3. **Dhaka ⇄ London (Qatar Airways QR-641 Qsuite)**: Economy **$620** | Qsuite Business **$1,250**
 4. **Dhaka ⇄ Bangkok (Thai Airways TG-322)**: Economy **$240** | Business **$520**
-5. **Private Jet Gulfstream G650ER**: **$8,500/trip** (Worldwide on-demand with private chef & limousine).
+5. **Dhaka ⇄ Cox's Bazar (BG-401)**: Economy **$65** | Business **$120**
+6. **Private Jet Gulfstream G650ER**: **$8,500/trip** (Worldwide on-demand with private chef & limousine).
 
-*Click the **"Book Ticket"** button below to reserve seats and generate your instant e-Ticket & Boarding Pass!*`;
-    }
+*Click the **"Book Flight & Issue Boarding Pass"** button below to reserve seats and generate your instant e-Ticket & Boarding Pass!*`;
 
     return {
       reply: flightReply,
       recommendations: flightCards,
-      suggestedAction: { target: 'flight-modal', label: lang === 'bn' ? 'ফ্লাইট টিকিট বুক ও পেমেন্ট' : lang === 'de' ? 'Flug buchen' : lang === 'ar' ? 'حجز تذكرة طيران' : 'Book Flight Ticket & Boarding Pass' },
+      suggestedAction: { target: 'flight-modal', label: 'Book Flight Ticket & Boarding Pass' },
       topicId: 'flights',
       flightSchedules: FLIGHT_SCHEDULES
     };
@@ -393,7 +354,7 @@ We provide instant flight ticket booking and digital boarding passes with top gl
   const availableTables = tables.filter(t => t.status === 'Available');
 
   if (matchedTopic) {
-    const text = isBengali ? matchedTopic.answerBn : matchedTopic.answerEn;
+    const text = matchedTopic.answerEn;
     let recommendations = [];
     let suggestedAction = null;
 
@@ -405,7 +366,7 @@ We provide instant flight ticket booking and digital boarding passes with top gl
         action: 'VIEW_ROOM',
         target: 'hotel'
       }));
-      suggestedAction = { target: 'hotel', label: isBengali ? 'সব লাক্সারি সুইট দেখুন' : 'Explore All Suites' };
+      suggestedAction = { target: 'hotel', label: 'Explore All Luxury Suites' };
     } else if (matchedTopic.id === 'dining_menu') {
       recommendations = menuItems.slice(0, 3).map(m => ({
         title: m.name,
@@ -414,11 +375,15 @@ We provide instant flight ticket booking and digital boarding passes with top gl
         action: 'ORDER_FOOD',
         target: 'delivery'
       }));
-      suggestedAction = { target: 'delivery', label: isBengali ? 'ফুড মেনু ও অর্ডার' : 'Order Gourmet Food' };
+      suggestedAction = { target: 'delivery', label: 'Order Gourmet Food' };
     } else if (matchedTopic.id === 'chauffeur_yacht') {
-      suggestedAction = { target: 'hotel', label: isBengali ? 'লিমোজিন ও ইয়ট রিজার্ভ করুন' : 'Reserve Chauffeur / Yacht' };
+      suggestedAction = { target: 'hotel', label: 'Reserve Chauffeur / Yacht' };
     } else if (matchedTopic.id === 'spa_wellness') {
-      suggestedAction = { target: 'hotel', label: isBengali ? 'স্পা ও ওয়েলনেস বুক করুন' : 'Book Luxury Spa Treatment' };
+      suggestedAction = { target: 'hotel', label: 'Book Luxury Spa Treatment' };
+    } else if (matchedTopic.id === 'tables') {
+      suggestedAction = { target: 'restaurant', label: 'Reserve Dining Table' };
+    } else if (matchedTopic.id === 'invoices_billing') {
+      suggestedAction = { target: 'invoices', label: 'View Invoices & Receipts' };
     }
 
     return {
@@ -429,36 +394,26 @@ We provide instant flight ticket booking and digital boarding passes with top gl
     };
   }
 
-  // Default Fallback
+  // Default Fallback in 100% English
   const fallbackEn = `Welcome to **Grand Aurelia Enterprise AI ChatBoot & Global Concierge**!
 I have complete knowledge of our luxury hospitality ecosystem:
-- ✈️ **Airlines & Flight Booking**: Emirates, Singapore Airlines, Qatar Airways, Domestic & Private Jets.
-- 🏨 **Luxury Suites & Pricing**: Room rates ($180-$450), amenities & VIP add-ons.
-- 🚗 **Chauffeur & Yacht Charter**: Rolls-Royce Phantom, Maybach & 65ft Azure Private Yacht.
-- 💆 **Royal Spa & Wellness**: Moroccan Hammam, 24K Gold Facials & Hot Stone therapy.
-- 🍽️ **Gourmet Food & Menu**: Wagyu Steak, Atlantic Salmon, Pasta & Lava Cake.
-- 🪑 **Table Reservations**: Grand Hall, Terrace Garden & VIP Lounge.
-- 👨‍🍳 **Kitchen KDS & Delivery**: Live cooking flow & simulated GPS rider transit.
-- 💳 **Billing & Invoices**: Itemized 10% VAT tax folios, bKash, Nagad, Visa/Mastercard.
+• ✈️ **Airlines & Flight Booking**: Emirates, Singapore Airlines, Qatar Airways, Domestic & Private Jets.
+• 🏨 **Luxury Suites & Pricing**: Room rates ($180-$450), amenities & VIP add-ons.
+• 🚗 **Chauffeur & Yacht Charter**: Rolls-Royce Phantom, Maybach & 65ft Azure Private Yacht.
+• 💆 **Royal Spa & Wellness**: Moroccan Hammam, 24K Gold Facials & Hot Stone therapy.
+• 🍽️ **Gourmet Food & Menu**: Wagyu Steak, Atlantic Salmon, Pasta & Lava Cake.
+• 🪑 **Table Reservations**: Grand Hall, Terrace Garden & VIP Lounge.
+• 👨‍🍳 **Kitchen KDS & Delivery**: Live cooking flow & simulated GPS rider transit.
+• 💳 **Billing & Invoices**: Itemized 10% VAT tax folios, bKash, Nagad, Visa/Mastercard.
 
-*Ask any question in English, German (Deutsch), Arabic, or বাংলা (Bengali)!*`;
-
-  const fallbackBn = `**গ্র্যান্ড অরেলিয়া এন্টারপ্রাইজ নলেজ বেজ ও AI ChatBoot-এ স্বাগতম!**
-আমি এই প্ল্যাটফর্মের সকল বিষয়ে সম্পূর্ণ অভিজ্ঞ:
-- ✈️ **এয়ারলাইন্স ও বিমান টিকিট বুকিং**: এমিরেটস, কাতার এয়ারওয়েজ, সিঙ্গাপুর এয়ারলাইন্স ও প্রাইভেট জেট।
-- 🏨 **লাক্সারি সুইট ও ভাড়া**: রুমের দাম ($১৮০-$৪৫০), সুযোগ-সুবিধা ও চেক-ইন।
-- 🚗 **লিমোজিন ও ইয়ট চার্টার**: রোলস-রয়েস, মেবাখ ও ৬৫ ফুট প্রাইভেট ইয়ট।
-- 💆 **রয়্যাল স্পা ও ম্যাসাজ**: মরোক্কান হাম্মাম ও ২৪ ক্যারেট গোল্ড ফেসিয়াল।
-- 🍽️ **খাবার ও রেস্তোরাঁ মেনু**: ওয়াগিউ স্টেক, স্যামন, পাস্তা ও ডেজার্ট।
-- 🪑 **টেবিল রিজার্ভেশন**: ইনডোর হল, টেরেস গার্ডেন ও ভিআইপি লাউঞ্জ।
-- 💳 **ইনভয়েস ও বিলিং**: ১০% ভ্যাট, বিকাশ, নগদ ও কার্ড পেমেন্ট।`;
+*You can speak via Microphone in any language (Bengali, German, Arabic, etc.) and I will always provide answers in clear English!*`;
 
   return {
-    reply: isBengali ? fallbackBn : fallbackEn,
+    reply: fallbackEn,
     recommendations: [
       { title: 'Emirates Dubai Flight (EK-583)', subtitle: 'Economy $380 • Business $850 • First $1,650', action: 'BOOK_FLIGHT', target: 'flight-modal', flightData: FLIGHT_SCHEDULES[0] },
       { title: 'Deluxe Ocean Suite', subtitle: 'Sea View • $180/night', image: rooms[0]?.image, action: 'VIEW_ROOM', target: 'hotel' }
     ],
-    suggestedAction: { target: 'overview', label: isBengali ? 'সম্পূর্ণ ড্যাশবোর্ড' : 'Explore Platform Dashboard' }
+    suggestedAction: { target: 'overview', label: 'Explore Platform Dashboard' }
   };
 }
